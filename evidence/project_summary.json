@@ -4050,5 +4050,568 @@
     "legacy_context_only": 0,
     "legacy_teacher": 32768
   },
-  "real_3d_truth": false
+  "real_3d_truth": false,
+  "layout": "one_continuous_page",
+  "model_training": {
+    "schema": 1,
+    "checked_date": "2026-11-03",
+    "purpose": "Source-backed architecture, training and evaluation evidence for the single ST3D project report",
+    "architecture": {
+      "parameters": 1929971,
+      "parameter_scope": "ST3D reconstruction network only; TrackNet detector excluded",
+      "feature_container_dim": 47,
+      "effective_inputs": "Observed ball UV and confidence, visibility mask, physical time, 13 projected court points, 24x24 grayscale crop and heatmap, crop center and scale. Explicit K/R/C slots are zero in A_keypoints.",
+      "token_embedding": {
+        "ball_linear": [
+          3,
+          96
+        ],
+        "missing_token_dim": 96,
+        "court_slot_linear": [
+          42,
+          96
+        ],
+        "court_effective_nonzero_dim": 26,
+        "zeroed_camera_slots": 16,
+        "concatenation_dim": 192,
+        "merge_linear": [
+          192,
+          192
+        ],
+        "embedding_activation": null,
+        "crop_metadata_linear": [
+          3,
+          192
+        ],
+        "crop_metadata_activation": null,
+        "fusion": "Sum of merged ball/court token, crop metadata projection, and CNN embedding; time goes to rotary attention"
+      },
+      "image_encoder": {
+        "input_shape": [
+          2,
+          24,
+          24
+        ],
+        "channel_names": [
+          "grayscale crop",
+          "contrast heatmap"
+        ],
+        "normalization": "Per frame/channel mean and standard deviation; standard deviation minimum 0.02",
+        "layers": [
+          {
+            "kind": "Conv2d",
+            "channels": [
+              2,
+              16
+            ],
+            "kernel": 3,
+            "stride": 1,
+            "padding": 1,
+            "out_hw": 24,
+            "activation": "GELU"
+          },
+          {
+            "kind": "Conv2d",
+            "channels": [
+              16,
+              32
+            ],
+            "kernel": 3,
+            "stride": 2,
+            "padding": 1,
+            "out_hw": 12,
+            "activation": "GELU"
+          },
+          {
+            "kind": "Conv2d",
+            "channels": [
+              32,
+              32
+            ],
+            "kernel": 3,
+            "stride": 2,
+            "padding": 1,
+            "out_hw": 6,
+            "activation": "GELU"
+          },
+          {
+            "kind": "AvgPool2d",
+            "kernel": 2,
+            "out_hw": 3
+          },
+          {
+            "kind": "Flatten",
+            "out_dim": 288
+          },
+          {
+            "kind": "Linear",
+            "dimensions": [
+              288,
+              192
+            ]
+          },
+          {
+            "kind": "LayerNorm",
+            "dimensions": 192
+          }
+        ]
+      },
+      "temporal": {
+        "blocks": 4,
+        "width": 192,
+        "heads": 6,
+        "head_dim": 32,
+        "first_visible_only_key_layers": 1,
+        "remaining_keys": "All non-padding time steps; missing queries are reconstructed",
+        "block_order": [
+          "LayerNorm",
+          "QKV linear 192 -> 576",
+          "Seconds-based rotary positions on Q and K",
+          "Scaled dot-product attention, six heads, no dropout",
+          "Output linear 192 -> 192 and residual",
+          "LayerNorm",
+          "FFN linear 192 -> 768, GELU, linear 768 -> 192 and residual"
+        ],
+        "rope_frequency_rad_per_s": [
+          0.01,
+          30
+        ],
+        "bidirectional": true
+      },
+      "head": {
+        "layers": [
+          "LayerNorm(192)",
+          "Linear(192,192)",
+          "GELU",
+          "Linear(192,3)"
+        ],
+        "metric_scale_xyz": [
+          3.05,
+          6.7,
+          5.0
+        ]
+      },
+      "inference": {
+        "mode": "Offline complete-rally coverage from overlapping windows",
+        "context_frames": 192,
+        "output_core_frames": 16,
+        "fully_observed_rally_not_required": true,
+        "source": "scripts/research_paper_baselines/models.py"
+      },
+      "sources": [
+        "rally3d/b1.py",
+        "scripts/research_v03_abc/models.py",
+        "scripts/research_paper_baselines/models.py",
+        "scripts/research_tt4d_scale/dataset.py",
+        "scripts/research_tt4d_scale/train.py",
+        "scripts/research_realvideo_20261030/pipeline.py"
+      ]
+    },
+    "original_model_training": {
+      "physical_trajectories": 2600000,
+      "seed": 7,
+      "epochs": 17,
+      "batch": 64,
+      "optimizer": "Adam",
+      "learning_rate": 0.0001,
+      "initialization": "random initialization, no warm start from smaller datasets",
+      "steps": 690625,
+      "trajectory_visits": 44200000,
+      "supervised_frame_visits": 5639053965,
+      "wall_seconds": 22441.656118373037,
+      "wall_hours": 6.233793366214733,
+      "wall_time_human": "6 h 14 min 2 s",
+      "time_scope": "Training-loop wall clock, including on-the-fly rendering, explicit duty-cycle sleeps, checkpoint saves and scheduled dev evaluation. Excludes separate initial dataset/cache construction and final full test evaluation. Not pure GPU compute time.",
+      "duty_cycle": 0.65,
+      "train_length": {
+        "min_frames": 20,
+        "max_frames": 250,
+        "sampling": "Independent uniform integer length per batch; random contiguous crop within each trajectory; pad only if trajectory shorter than requested length; not fixed192 and not always full rally"
+      },
+      "view_schedule": "One of four views per trajectory visit, rotating with epoch",
+      "precision": "BF16 autocast for network forward; FP32 parameters and targets; EMA weights used at evaluation",
+      "loss": "Per-trajectory mean squared error on normalized XYZ over non-padding frames",
+      "gradient_clip_norm": 1.0,
+      "checkpoint": "reports/tt4d_scale_20261025/runs/A_N2600000_s7/epoch17.pt",
+      "checkpoint_sha256": "7f73fe512b1d0641995018133d4b8125ef2b4c2624c7427b0beefdf92457db51",
+      "completed_utc": "2026-10-26T05:05:43.966327+00:00",
+      "sources": [
+        "scripts/research_tt4d_scale/dataset.py",
+        "scripts/research_tt4d_scale/train.py",
+        "scripts/research_realvideo_20261030/pipeline.py",
+        "reports/tt4d_scale_20261025/runs/A_N2600000_s7/config.json",
+        "reports/tt4d_scale_20261025/runs/A_N2600000_s7/complete.json"
+      ]
+    },
+    "recent_campaigns": [
+      {
+        "campaign": "st3d_mita100k_20261101",
+        "status": "COMPLETE",
+        "seed": 7,
+        "campaign_elapsed_seconds": 40758.526983737946,
+        "campaign_elapsed_hours": 11.321813051038319,
+        "time_scope": "Recorded entire campaign elapsed; includes preparation, training and validation. Do not call this one model training time.",
+        "training_steps_per_arm": 300000,
+        "epochs": 6.0,
+        "batch": 4,
+        "sources": [
+          "reports/st3d_mita100k_20261101/budget.json",
+          "reports/st3d_mita100k_20261101/status.json",
+          "reports/st3d_mita100k_20261101/training_budget.json"
+        ],
+        "matched_steps": 131072
+      },
+      {
+        "campaign": "st3d_unfreeze_20261101",
+        "status": "COMPLETE",
+        "seed": 7,
+        "campaign_elapsed_seconds": 33836.42995882034,
+        "campaign_elapsed_hours": 9.39900832189454,
+        "time_scope": "Recorded entire campaign elapsed; includes preparation, training and validation. Do not call this one model training time.",
+        "training_steps_per_arm": 50000,
+        "epochs": 1.0,
+        "batch": 4,
+        "sources": [
+          "reports/st3d_unfreeze_20261101/budget.json",
+          "reports/st3d_unfreeze_20261101/status.json",
+          "reports/st3d_unfreeze_20261101/training_budget.json"
+        ],
+        "common_steps": 25000
+      },
+      {
+        "campaign": "st3d_exposure_20261102",
+        "status": "COMPLETE",
+        "seed": 7,
+        "campaign_elapsed_seconds": 8021.752415895462,
+        "campaign_elapsed_hours": 2.228264559970962,
+        "time_scope": "Recorded entire campaign elapsed; includes preparation, training and validation. Do not call this one model training time.",
+        "training_steps_per_arm": 32768,
+        "epochs": 4.0,
+        "batch": 4,
+        "sources": [
+          "reports/st3d_exposure_20261102/budget.json",
+          "reports/st3d_exposure_20261102/status.json",
+          "reports/st3d_exposure_20261102/training_budget.json"
+        ]
+      },
+      {
+        "campaign": "st3d_oov_20261103",
+        "status": "COMPLETE",
+        "seed": 7,
+        "campaign_elapsed_seconds": 21845.419843435287,
+        "campaign_elapsed_hours": 6.068172178732024,
+        "time_scope": "Recorded entire campaign elapsed; includes preparation, training and validation. Do not call this one model training time.",
+        "training_steps_per_arm": 131072,
+        "epochs": 8.0,
+        "batch": 4,
+        "sources": [
+          "reports/st3d_oov_20261103/budget.json",
+          "reports/st3d_oov_20261103/status.json",
+          "reports/st3d_oov_20261103/training_budget.json"
+        ]
+      },
+      {
+        "campaign": "st3d_oov_diagnosis_20261103",
+        "status": "COMPLETE",
+        "seed": 7,
+        "campaign_elapsed_seconds": 3297.5498745441437,
+        "campaign_elapsed_hours": 0.9159860762622621,
+        "time_scope": "Recorded entire campaign elapsed; includes preparation, training and validation. Do not call this one model training time.",
+        "training_steps_per_arm": 32768,
+        "epochs": 2.0,
+        "batch": 4,
+        "sources": [
+          "reports/st3d_oov_diagnosis_20261103/budget.json",
+          "reports/st3d_oov_diagnosis_20261103/status.json",
+          "reports/st3d_oov_diagnosis_20261103/training_budget.json"
+        ]
+      }
+    ],
+    "official_comparison": {
+      "physical_trajectories": 131072,
+      "seed": 7,
+      "epochs": 34,
+      "views": 4,
+      "test_physical": 512,
+      "test_views": 2,
+      "metrics_order": [
+        "normal all-frame mean 3D error",
+        "gap120 missing-frame mean 3D error",
+        "hitgap30 hit-adjacent missing-frame mean 3D error"
+      ],
+      "unit": "m",
+      "results": [
+        {
+          "arm": "ST3D",
+          "epoch": 34,
+          "full": [
+            0.8359979590386502,
+            2.1929559888667427,
+            1.4541302674479084
+          ],
+          "ctx192": [
+            0.27317595497879665,
+            1.808498345024418,
+            0.9300141027051723
+          ]
+        },
+        {
+          "arm": "Uplifting",
+          "epoch": 34,
+          "full": [
+            0.5767004559165798,
+            3.019875525846146,
+            2.9307433790527284
+          ],
+          "ctx192": [
+            0.40282900450984016,
+            3.0148455786984414,
+            2.860423377947882
+          ]
+        },
+        {
+          "arm": "SpinTrajectory2025",
+          "epoch": 34,
+          "full": [
+            0.5077743004803779,
+            3.0365947273094207,
+            2.905065468046814
+          ],
+          "ctx192": [
+            0.3978310316015268,
+            3.021103571401909,
+            2.8830217903014272
+          ]
+        }
+      ],
+      "matched_training_steps": 69632,
+      "matched_training_visits": 4456448,
+      "campaign_elapsed_hours": 2.816339995728599,
+      "campaign_time_note": "One scheduled comparison campaign elapsed, not total historical cost of all method weights; ST3D reused earlier training exposure.",
+      "limitations": "Official author code adapted to badminton; missing-frame adapters, inputs and supervision differ. Not original table-tennis paper reproduction, nor a pure one-component architecture ablation."
+    },
+    "real_evaluation": {
+      "rallies": 12,
+      "matches": 6,
+      "frames": 6405,
+      "unit": "original-video pixels",
+      "aggregation": "Compute each rally metric first, then equally average 12 rallies",
+      "original_2d_mean": 16.231561284668263,
+      "refined_2d_mean": 4.116459557991179,
+      "original_2d_p95": 60.653457267718295,
+      "refined_2d_p95": 11.385216416212721,
+      "refined_gap15_hidden_px": 80.8775710660331,
+      "real_3d_truth": false,
+      "natural_missing_scored_frames": 7,
+      "limitations": "Previously exposed fixed-camera public videos, possible detector pretraining overlap. Approximate manual court calibration and explicit geometric/temporal postprocessing. Projection error is not true3D error."
+    },
+    "source_sha256": {
+      "rally3d/b1.py": "a0b6b5dda9c6625af64263a8b7f911dd56f09275281a15200ad2d3c8ecb089c6",
+      "scripts/research_v03_abc/models.py": "2b92879673d478619e4ea380fb970366fbffc4255696dc8c6248b09ec814059d",
+      "scripts/research_paper_baselines/models.py": "7905067c99a3806c423e10bc247899d5f724b1d7d9e2d3c31047cb9e353f5ada",
+      "scripts/research_tt4d_scale/dataset.py": "c3d8d011b591fe2c88dd83354681fecdb3613e0dd0f4c93f170a48e1b44fc696",
+      "scripts/research_tt4d_scale/train.py": "f67371f198645000e87a4f1d9c8311315df05ffe4a0f04a8f3b130c5170df2cb",
+      "scripts/research_realvideo_20261030/pipeline.py": "1fdd58358542f7c33762608ea1da6d39fcb7281683dc1f0001559606caa63d46",
+      "reports/tt4d_scale_20261025/runs/A_N2600000_s7/config.json": "22c83584c791c2be14dd16a8fc6798c49d603c4b2606574e9797108ca9108a67",
+      "reports/tt4d_scale_20261025/runs/A_N2600000_s7/complete.json": "cf415930f7899446b54cde2b2a59b2f5d2e7618ed90ecdc4c42455698da205aa",
+      "reports/st3d_single4h_20261026/summary.json": "9721f371b5540430ce197f03bfd4cecdf2a9477c63ce724b2427fca2f657ba2f",
+      "reports/st3d_single4h_20261026/completion.json": "1dd3e5d4bfebc943a41a8eb75ac870337f6f0947c1ab1d8c3cb65e94fa505ed1",
+      "reports/st3d_single4h_20261026/training_exposure_audit.json": "d7dd050ada42ecdda637172cc344827b1df5505e8a13d6a026b6c765030e249f",
+      "reports/st3d_realtemporal_20261030/summary.json": "77cfdca8f2fdd86fcd319a440cb34238e9bafe108e3607568df35d50b65e6f83",
+      "reports/st3d_mita100k_20261101/budget.json": "e2715bbc4269f812bbf96c88c8c315eecd7ebacc3b018e1fb32c6ee1474160ad",
+      "reports/st3d_mita100k_20261101/status.json": "abc3369aa0c9f6959f050214505e39643f91f766ec8b4578ac4f1c7102a4b5f0",
+      "reports/st3d_mita100k_20261101/training_budget.json": "5ca6c49c507dcbd70668b66d4633a0de9df6ba656555c8bf510605aa038d8724",
+      "reports/st3d_unfreeze_20261101/budget.json": "5dfce54bc3b0d5ae4d94482f218eb9723f3811b89b0d7d4aac5f0e843b49b322",
+      "reports/st3d_unfreeze_20261101/status.json": "38a9e21170421b51999ee3a34fdb60236f85959cb1a070090f211027e7829406",
+      "reports/st3d_unfreeze_20261101/training_budget.json": "15cd94e8cf931d1ff4679627004a364b60c40d7bf81bd88cc7b33e0aca941d83",
+      "reports/st3d_exposure_20261102/budget.json": "13a6f1453a65989d959a99a4ab862ca619e3b8c962d6158552377f22fd3f1bdf",
+      "reports/st3d_exposure_20261102/status.json": "21cb15e0ae765f555dafd30d2fcaa2420a190f73791134779c605b7320004468",
+      "reports/st3d_exposure_20261102/training_budget.json": "3a89d135420742abc6de5734fdf43255a29cc5446d89631807fd5d2d9b024345",
+      "reports/st3d_oov_20261103/budget.json": "9d19459317d82d28a850b29aefc9f92a87fdd018af9cbfb3f1d845d557813f23",
+      "reports/st3d_oov_20261103/status.json": "15d82f3ad5f990bd871d26effb7d50b6787ddf1a20ebdae1f842f4a19239e7e7",
+      "reports/st3d_oov_20261103/training_budget.json": "a0ea06606baf5e402b1267a7d6cf9db0750c81ed37c12b4e0fc43a5c5d7891e9",
+      "reports/st3d_oov_diagnosis_20261103/budget.json": "5d085d276ef30682a3337b5fe844f46a0bbf48958c66a2487ff7f2a0835f4423",
+      "reports/st3d_oov_diagnosis_20261103/status.json": "6c3073abb989c4e0bba1dd8ab10ed02bd180ea05fd3867ca8fc7d2bf7c4ccb72",
+      "reports/st3d_oov_diagnosis_20261103/training_budget.json": "0d0ea3b4069273d404f182d00cd23e11f428b20c36d637e9265032f31119cad9"
+    }
+  },
+  "media": {
+    "status": "PASS",
+    "no_training": true,
+    "no_prediction_changes": true,
+    "script_sha256": "90e97dc6412947b83f1de714d74e53e02b88424c3aca1dbd925c1c3b29d64632",
+    "videos": [
+      {
+        "file": "synthetic_2d3d.mp4",
+        "frames": 116,
+        "fps": 15,
+        "duration_seconds": 7.733333333333333,
+        "original_frames": 232,
+        "original_fps": 30.0,
+        "display_sampling": "nearest source frame at15fps; original duration retained",
+        "sha256": "099c3f9696af3d53cdc916e881444a3053e41978611ef6d9a016b67a8174e7d1",
+        "decoded_all_frames": true,
+        "kind": "synthetic",
+        "sample": "fw-test-00000",
+        "mean_3d_cm": 23.067991544174266,
+        "p95_3d_cm": 43.71045429992611,
+        "prediction_checkpoint_sha256": "7f73fe512b1d0641995018133d4b8125ef2b4c2624c7427b0beefdf92457db51",
+        "source_prediction_sha256": "8da78f9afa6bc53e17e3c81186dcbcf9c60d2701b9d4eaf486d3fe03c4495e79",
+        "display_scene": "Calibrated projection of the same court and physical XYZ; illustrative scene only, network input remains stored local crop and heatmap.",
+        "camera_zoom": {
+          "center_px": [
+            966.3708638419857,
+            568.3056430149621
+          ],
+          "uniform_display_scale": 1.7066614831084679
+        },
+        "params": 1929971
+      },
+      {
+        "file": "real_inframe.mp4",
+        "frames": 155,
+        "fps": 15,
+        "duration_seconds": 10.333333333333334,
+        "original_frames": 308,
+        "original_fps": 30.0,
+        "display_sampling": "nearest source frame at15fps; original duration retained",
+        "sha256": "6ca4952a4860d28c7a822a349024b49a2f2222ffcca179f875f408001f76816a",
+        "decoded_all_frames": true,
+        "kind": "real",
+        "case": "new4_r1",
+        "start_frame": 183,
+        "end_frame_exclusive": 491,
+        "full_rally_frames": 714,
+        "start_seconds": 6.1,
+        "end_seconds": 16.366666666666667,
+        "all_excerpt_labels_visible_inframe": true,
+        "border_margin_px": 16,
+        "excerpt_mean_px": 3.3555400744400123,
+        "full_rally_mean_px": 4.901237026446349,
+        "full_rally_before_px": 22.714099566006634,
+        "real_3d_truth": false,
+        "selection": "Longest contiguous human-labelled visible interval with 16px border margin among the 12 real rallies; not selected by prediction error.",
+        "source_video_sha256": "80b0ecf5005f903048eb18237bcb4dcf8af72ae4a0e04a2447c54acffd3932ae",
+        "predictions_sha256": "74751d4c450d745ca2e027a73a7a231fc031b880c99eaac212d8a913cea33708"
+      }
+    ]
+  },
+  "real_temporal": {
+    "natural": {
+      "adapted": {
+        "mean_px": 16.231561284668263,
+        "p95_px": 60.653457267718295,
+        "missing_px": 15.272990265797699,
+        "turn_px": 15.702150029016698,
+        "speed_max": 95.57897186279297,
+        "accel_p95": 1020.0841827392578,
+        "hidden_only_px": null
+      },
+      "overlap_light_1": {
+        "mean_px": 4.116459557991179,
+        "p95_px": 11.385216416212721,
+        "missing_px": 11.891689884645514,
+        "turn_px": 5.287512709480445,
+        "speed_max": 100.41753482818604,
+        "accel_p95": 589.2634531656901,
+        "hidden_only_px": null
+      }
+    },
+    "drop10": {
+      "adapted": {
+        "mean_px": 16.60800310877721,
+        "p95_px": 60.56946225578878,
+        "missing_px": 20.003707188700574,
+        "turn_px": 16.174149094898365,
+        "speed_max": 104.06195068359375,
+        "accel_p95": 1057.5615488688152,
+        "hidden_only_px": 20.06649315669992
+      },
+      "overlap_light_1": {
+        "mean_px": 4.78207309795405,
+        "p95_px": 13.427115962106258,
+        "missing_px": 10.430499324189467,
+        "turn_px": 5.942912684354909,
+        "speed_max": 94.87966632843018,
+        "accel_p95": 582.6410878499349,
+        "hidden_only_px": 10.400411604085368
+      }
+    },
+    "gap15": {
+      "adapted": {
+        "mean_px": 17.6924677709161,
+        "p95_px": 63.11569228056137,
+        "missing_px": 76.88706823689976,
+        "turn_px": 18.375588706378018,
+        "speed_max": 98.66909980773926,
+        "accel_p95": 1015.3756866455078,
+        "hidden_only_px": 83.37211330319742
+      },
+      "overlap_light_1": {
+        "mean_px": 5.780346892430472,
+        "p95_px": 14.11063052638132,
+        "missing_px": 74.37942596998847,
+        "turn_px": 8.408953548241529,
+        "speed_max": 99.511243502299,
+        "accel_p95": 568.4554824829102,
+        "hidden_only_px": 80.8775710660331
+      }
+    },
+    "turngap12": {
+      "adapted": {
+        "mean_px": 16.99699303706967,
+        "p95_px": 62.16117516512558,
+        "missing_px": 41.307521674896606,
+        "turn_px": 17.985752906412515,
+        "speed_max": 93.67751566569011,
+        "accel_p95": 1007.413584391276,
+        "hidden_only_px": 51.27537732185051
+      },
+      "overlap_light_1": {
+        "mean_px": 4.9155389863448535,
+        "p95_px": 12.838270755470793,
+        "missing_px": 38.979863152043855,
+        "turn_px": 7.765975090017792,
+        "speed_max": 99.33579095204671,
+        "accel_p95": 562.4914627075195,
+        "hidden_only_px": 48.97508006420228
+      }
+    },
+    "synthetic": {
+      "adapted": {
+        "mean_3d_m": 0.2650753909256309,
+        "missing_3d_m": 0.43913869621853036,
+        "hit_3d_m": 0.34431608847808093,
+        "velocity_rmse": 2.365607709856704
+      },
+      "overlap_light_1": {
+        "mean_3d_m": 0.24183580846874975,
+        "missing_3d_m": 0.41304346709512174,
+        "hit_3d_m": 0.32585971042863093,
+        "velocity_rmse": 2.0166807362111285
+      },
+      "smooth": {
+        "mean_3d_m": 0.2723757507337723,
+        "missing_3d_m": 0.4175682592516144,
+        "hit_3d_m": 0.37652470072498545,
+        "velocity_rmse": 3.310677467379719
+      }
+    },
+    "synthetic_delta_ci95_m": [
+      -0.02634931333232089,
+      -0.02044191265886184
+    ],
+    "new_full_3d_pipeline_rallies": 12,
+    "new_frames": 6405,
+    "new_matches": 6,
+    "downloaded_rallies": 16,
+    "calibration_rejections": 4,
+    "natural_missing_scored_frames": 7,
+    "real_accuracy_type": "2D reprojection only; no real 3D truth",
+    "postprocess": true
+  },
+  "real_longgap_px": {
+    "gap60": 137.07632760468428,
+    "gap120": 163.83176654991811
+  }
 }

@@ -4613,5 +4613,10 @@
   "real_longgap_px": {
     "gap60": 137.07632760468428,
     "gap120": 163.83176654991811
+  },
+  "interactive_replay": {
+    "enabled": true,
+    "layout": "original_detection_orbit_3d",
+    "source_model_unchanged": true
   }
 }

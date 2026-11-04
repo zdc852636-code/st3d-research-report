@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-03",
+  "updated": "2026-11-04",
   "scope": "Whole ST3D project presentation; metrics from different study protocols are not one ranked benchmark",
   "source_sha256": {
     "st3d_single4h_20261026/summary.json": "160d443c6afd6fe8c2e3917dc0cc567d9f54634a6ddd0c5c05d4255caa04428a",
@@ -4468,31 +4468,57 @@
         "params": 1929971
       },
       {
-        "file": "real_inframe.mp4",
-        "frames": 155,
-        "fps": 15,
-        "duration_seconds": 10.333333333333334,
-        "original_frames": 308,
-        "original_fps": 30.0,
-        "display_sampling": "nearest source frame at15fps; original duration retained",
-        "sha256": "6ca4952a4860d28c7a822a349024b49a2f2222ffcca179f875f408001f76816a",
-        "decoded_all_frames": true,
-        "kind": "real",
-        "case": "new4_r1",
-        "start_frame": 183,
-        "end_frame_exclusive": 491,
-        "full_rally_frames": 714,
-        "start_seconds": 6.1,
-        "end_seconds": 16.366666666666667,
-        "all_excerpt_labels_visible_inframe": true,
-        "border_margin_px": 16,
-        "excerpt_mean_px": 3.3555400744400123,
-        "full_rally_mean_px": 4.901237026446349,
-        "full_rally_before_px": 22.714099566006634,
+        "status": "PASS",
+        "sample": "bba_side_12s",
+        "frames": 360,
+        "fps": 30.0,
+        "source_frames": [
+          0,
+          360
+        ],
+        "source_video_sha256": "6d0c8a1edcd1dae4c55480a472c5c495f4744ad48d75d9910875c9e2f7bf212a",
+        "checkpoint_sha256": "7f73fe512b1d0641995018133d4b8125ef2b4c2624c7427b0beefdf92457db51",
+        "parameters": 1929971,
+        "raw_detected_frames": 356,
+        "accepted_detections": 300,
+        "coverage": 0.8333333333333334,
+        "isolated_outliers_removed": 56,
+        "metrics": {
+          "base": {
+            "detector_consistency_mean_px": 175.72866363995647,
+            "height_min_m": 0.39932751655578613,
+            "height_max_m": 5.149198055267334,
+            "behind_camera_frames": 0
+          },
+          "overlap": {
+            "detector_consistency_mean_px": 173.17001817393646,
+            "height_min_m": 0.3993038535118103,
+            "height_max_m": 5.149192810058594,
+            "behind_camera_frames": 0
+          },
+          "refined": {
+            "detector_consistency_mean_px": 24.153198342218744,
+            "height_min_m": -2.669656276702881,
+            "height_max_m": 5.971709251403809,
+            "behind_camera_frames": 0
+          }
+        },
+        "calibration_fit_rmse_px": 2.052753515694625,
+        "calibration_check_rmse_px": 3.0091403790432882,
+        "registration_median_px": 0.7475653440703756,
+        "elapsed_seconds": 30.10150500497548,
+        "real_2d_labels": false,
         "real_3d_truth": false,
-        "selection": "Longest contiguous human-labelled visible interval with 16px border margin among the 12 real rallies; not selected by prediction error.",
-        "source_video_sha256": "80b0ecf5005f903048eb18237bcb4dcf8af72ae4a0e04a2447c54acffd3932ae",
-        "predictions_sha256": "74751d4c450d745ca2e027a73a7a231fc031b880c99eaac212d8a913cea33708"
+        "accuracy_claim": false,
+        "source": "Existing project footage from a prior BBA upload; original public URL not established.",
+        "camera": "Oblique side camera with small shake; static-background registration to source frame 225.",
+        "pipeline": "Background registration -> frozen TrackNet -> virtual_full_outlier -> frozen 2.6M/17epoch ST3D -> overlap_light_1",
+        "predictions_sha256": "b5b984b5ddf57ff2897b743ceebecb3d362d31f92ac3a212ff2ea747bb2360ad",
+        "below_ground_frames": 3,
+        "quality_status": "exploratory_failed_physical_plausibility",
+        "not_a_precision_improvement": true,
+        "kind": "real",
+        "label": "new side-camera inference; no ball labels"
       }
     ]
   },
@@ -4618,5 +4644,237 @@
     "enabled": true,
     "layout": "original_detection_orbit_3d",
     "source_model_unchanged": true
+  },
+  "comparison_charts": {
+    "scaling": {
+      "title": "扩大训练数据：普通帧与缺失帧的误差如何变化",
+      "unit": "cm",
+      "source_fields": [
+        "summary.scaling[context=ctx192].rallies",
+        "summary.scaling[context=ctx192].normal_m",
+        "summary.scaling[context=ctx192].gap120_missing_m",
+        "summary.scaling[context=ctx192].hitgap30_hit_missing_m"
+      ],
+      "values": {
+        "rallies": [
+          32768,
+          131072,
+          524288,
+          2600000
+        ],
+        "normal_cm": [
+          56.371199917339254,
+          35.64313659298932,
+          24.4619022741972,
+          16.886040731333196
+        ],
+        "gap120_cmissing_cm": [
+          215.1403006282635,
+          190.32024756306782,
+          176.27205478493124,
+          163.70999557257164
+        ],
+        "hitgap30_hit_cmissing_cm": [
+          163.91654565522913,
+          113.96882864355575,
+          78.44353856489761,
+          59.72115227486938
+        ]
+      },
+      "display_values": [
+        [
+          56.37,
+          35.64,
+          24.46,
+          16.89
+        ],
+        [
+          215.14,
+          190.32,
+          176.27,
+          163.71
+        ],
+        [
+          163.92,
+          113.97,
+          78.44,
+          59.72
+        ]
+      ]
+    },
+    "baselines": {
+      "title": "与官方开源算法的羽毛球适配对照",
+      "unit": "cm",
+      "source_fields": [
+        "summary.official[arm].ctx192",
+        "summary.official[arm].full"
+      ],
+      "condition_order": [
+        "normal",
+        "gap120_missing",
+        "hitgap30_hit_missing"
+      ],
+      "values": {
+        "ctx192": {
+          "ST3D": [
+            27.317595497879665,
+            180.8498345024418,
+            93.00141027051723
+          ],
+          "Uplifting": [
+            40.282900450984016,
+            301.48455786984414,
+            286.0423377947882
+          ],
+          "SpinTrajectory2025": [
+            39.78310316015268,
+            302.1103571401909,
+            288.3021790301427
+          ]
+        },
+        "full": {
+          "ST3D": [
+            83.59979590386502,
+            219.29559888667427,
+            145.41302674479084
+          ],
+          "Uplifting": [
+            57.67004559165798,
+            301.9875525846146,
+            293.07433790527284
+          ],
+          "SpinTrajectory2025": [
+            50.777430048037786,
+            303.65947273094207,
+            290.5065468046814
+          ]
+        }
+      }
+    },
+    "real_before_after": {
+      "title": "真实视频：二维回投影误差的前后对照",
+      "unit": "px",
+      "source_fields": [
+        "temporal.natural.adapted.mean_px",
+        "temporal.natural.adapted.p95_px",
+        "temporal.natural.overlap_light_1.mean_px",
+        "temporal.natural.overlap_light_1.p95_px"
+      ],
+      "values": {
+        "adapted": {
+          "mean_px": 16.231561284668263,
+          "p95_px": 60.653457267718295
+        },
+        "overlap_light_1": {
+          "mean_px": 4.116459557991179,
+          "p95_px": 11.385216416212721
+        }
+      },
+      "aggregation": "Equal-weight mean over 12 rallies; P95 computed within each rally before averaging."
+    },
+    "long_gaps": {
+      "title": "真实视频压力测试：长时间缺失仍然困难",
+      "unit": "px",
+      "source_fields": [
+        "stress.rows[arm=frozen,stage=refined,condition=gap60|gap120].hidden_only_px"
+      ],
+      "values": {
+        "gap60": 137.07632760468428,
+        "gap120": 163.83176654991811
+      },
+      "scored_population": {
+        "gap60": {
+          "rallies": 12,
+          "hidden_scored_frames": 579
+        },
+        "gap120": {
+          "rallies": 12,
+          "hidden_scored_frames": 1177
+        }
+      },
+      "aggregation": "Equal-weight mean of hidden_only_px over 12 rallies per condition."
+    },
+    "diagnosis": {
+      "title": "训练诊断：追加训练尚未超过原模型",
+      "unit": "px",
+      "source_fields": [
+        "summary.latest_diagnosis.real_mean_px",
+        "summary.diagnosis_selected_steps"
+      ],
+      "values": {
+        "parent": {
+          "mean_px": 12.276694495530277,
+          "selected_steps": 0
+        },
+        "current_full": {
+          "mean_px": 31.404863805859492,
+          "selected_steps": 32768
+        },
+        "legacy_full": {
+          "mean_px": 30.549903049615995,
+          "selected_steps": 32768
+        },
+        "legacy_context_only": {
+          "mean_px": 12.276694495530277,
+          "selected_steps": 0
+        },
+        "legacy_teacher": {
+          "mean_px": 27.28888656332443,
+          "selected_steps": 32768
+        }
+      },
+      "zero_step_encoding": "gray diagonal hatch"
+    }
+  },
+  "side_camera_demonstration": {
+    "status": "PASS",
+    "sample": "bba_side_12s",
+    "frames": 360,
+    "fps": 30.0,
+    "source_frames": [
+      0,
+      360
+    ],
+    "source_video_sha256": "6d0c8a1edcd1dae4c55480a472c5c495f4744ad48d75d9910875c9e2f7bf212a",
+    "checkpoint_sha256": "7f73fe512b1d0641995018133d4b8125ef2b4c2624c7427b0beefdf92457db51",
+    "parameters": 1929971,
+    "raw_detected_frames": 356,
+    "accepted_detections": 300,
+    "coverage": 0.8333333333333334,
+    "isolated_outliers_removed": 56,
+    "metrics": {
+      "base": {
+        "detector_consistency_mean_px": 175.72866363995647,
+        "height_min_m": 0.39932751655578613,
+        "height_max_m": 5.149198055267334,
+        "behind_camera_frames": 0
+      },
+      "overlap": {
+        "detector_consistency_mean_px": 173.17001817393646,
+        "height_min_m": 0.3993038535118103,
+        "height_max_m": 5.149192810058594,
+        "behind_camera_frames": 0
+      },
+      "refined": {
+        "detector_consistency_mean_px": 24.153198342218744,
+        "height_min_m": -2.669656276702881,
+        "height_max_m": 5.971709251403809,
+        "behind_camera_frames": 0
+      }
+    },
+    "calibration_fit_rmse_px": 2.052753515694625,
+    "calibration_check_rmse_px": 3.0091403790432882,
+    "registration_median_px": 0.7475653440703756,
+    "elapsed_seconds": 30.10150500497548,
+    "real_2d_labels": false,
+    "real_3d_truth": false,
+    "accuracy_claim": false,
+    "source": "Existing project footage from a prior BBA upload; original public URL not established.",
+    "camera": "Oblique side camera with small shake; static-background registration to source frame 225.",
+    "pipeline": "Background registration -> frozen TrackNet -> virtual_full_outlier -> frozen 2.6M/17epoch ST3D -> overlap_light_1",
+    "predictions_sha256": "b5b984b5ddf57ff2897b743ceebecb3d362d31f92ac3a212ff2ea747bb2360ad",
+    "below_ground_frames": 3,
+    "quality_status": "exploratory_failed_physical_plausibility",
+    "not_a_precision_improvement": true
   }
 }

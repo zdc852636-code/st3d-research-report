@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-04",
+  "updated": "2026-11-06",
   "scope": "Whole ST3D project presentation; metrics from different study protocols are not one ranked benchmark",
   "source_sha256": {
     "st3d_single4h_20261026/summary.json": "160d443c6afd6fe8c2e3917dc0cc567d9f54634a6ddd0c5c05d4255caa04428a",
@@ -4468,57 +4468,80 @@
         "params": 1929971
       },
       {
-        "status": "PASS",
-        "sample": "bba_side_12s",
-        "frames": 360,
+        "case": "public_test1_new2",
+        "group": "Test/match1",
+        "frames": 349,
         "fps": 30.0,
-        "source_frames": [
-          0,
-          360
-        ],
-        "source_video_sha256": "6d0c8a1edcd1dae4c55480a472c5c495f4744ad48d75d9910875c9e2f7bf212a",
-        "checkpoint_sha256": "7f73fe512b1d0641995018133d4b8125ef2b4c2624c7427b0beefdf92457db51",
-        "parameters": 1929971,
-        "raw_detected_frames": 356,
-        "accepted_detections": 300,
-        "coverage": 0.8333333333333334,
-        "isolated_outliers_removed": 56,
-        "metrics": {
-          "base": {
-            "detector_consistency_mean_px": 175.72866363995647,
-            "height_min_m": 0.39932751655578613,
-            "height_max_m": 5.149198055267334,
-            "behind_camera_frames": 0
-          },
-          "overlap": {
-            "detector_consistency_mean_px": 173.17001817393646,
-            "height_min_m": 0.3993038535118103,
-            "height_max_m": 5.149192810058594,
-            "behind_camera_frames": 0
-          },
-          "refined": {
-            "detector_consistency_mean_px": 24.153198342218744,
-            "height_min_m": -2.669656276702881,
-            "height_max_m": 5.971709251403809,
-            "behind_camera_frames": 0
-          }
+        "duration_seconds": 11.633333333333333,
+        "visible_labeled_frames": 328,
+        "label_alignment": {
+          "rows": 349,
+          "video_frames": 349,
+          "unlabeled_frames": [],
+          "alignment": "Explicit Frame IDs; no temporal shift, no interpolation; unlabeled frames excluded only from accuracy metrics"
         },
-        "calibration_fit_rmse_px": 2.052753515694625,
-        "calibration_check_rmse_px": 3.0091403790432882,
-        "registration_median_px": 0.7475653440703756,
-        "elapsed_seconds": 30.10150500497548,
-        "real_2d_labels": false,
-        "real_3d_truth": false,
-        "accuracy_claim": false,
-        "source": "Existing project footage from a prior BBA upload; original public URL not established.",
-        "camera": "Oblique side camera with small shake; static-background registration to source frame 225.",
-        "pipeline": "Background registration -> frozen TrackNet -> virtual_full_outlier -> frozen 2.6M/17epoch ST3D -> overlap_light_1",
-        "predictions_sha256": "b5b984b5ddf57ff2897b743ceebecb3d362d31f92ac3a212ff2ea747bb2360ad",
-        "below_ground_frames": 3,
-        "quality_status": "exploratory_failed_physical_plausibility",
-        "not_a_precision_improvement": true,
+        "raw_detection": {
+          "detected_frames": 329,
+          "coverage": 0.9426934097421203,
+          "mean_denominator": "visible-labeled AND detected frames",
+          "paired_frames": 322,
+          "mean_px": 15.065316357070373,
+          "median_px": 2.3048861143232218,
+          "p95_px": 24.841075812782755,
+          "recall_at20": 0.926829268292683,
+          "success_at20": 304,
+          "visible_misses": 6
+        },
+        "accepted_detection": {
+          "detected_frames": 317,
+          "coverage": 0.9083094555873925,
+          "paired_frames": 310,
+          "mean_px": 4.9126985750054235,
+          "median_px": 2.284366199428788,
+          "p95_px": 8.696655673822491,
+          "recall_at20": 0.9237804878048781,
+          "success_at20": 303,
+          "visible_misses": 18
+        },
+        "runtime": {
+          "decode_s": 0.10367871500784531,
+          "detector_s": 8.086846139020054,
+          "input_adapter_s": 0.10137548300554045,
+          "base_ctx192_s": 0.00755407300312072,
+          "overlap_s": 0.003264859988121316,
+          "refinement_s": 0.00484169801347889
+        },
+        "wall_s": 8.377719973999774,
+        "calibration": {
+          "fit_rmse_px": 0.8967890894095034,
+          "check_rmse_px": 2.2047074986480664,
+          "assumptions": "Square pixels, zero skew/distortion, principal point at image center; approximate monocular camera, for projection checks only"
+        },
+        "base": {
+          "mean_px": 26.03658887414888,
+          "median_px": 14.906284726879132,
+          "p95_px": 78.74824181851103,
+          "denominator": "All visible-labeled frames, including detector misses",
+          "negative_height_frames": 0,
+          "min_height_m": 0.8392791748046875,
+          "max_height_m": 4.413880348205566,
+          "behind_camera_frames": 0,
+          "missing_visible_mean_px": 41.05948974887721
+        },
+        "refined": {
+          "mean_px": 8.7255302336561,
+          "median_px": 4.531153087303567,
+          "p95_px": 16.730080727634654,
+          "denominator": "All visible-labeled frames, including detector misses",
+          "negative_height_frames": 0,
+          "min_height_m": 0.8616763353347778,
+          "max_height_m": 4.472797393798828,
+          "behind_camera_frames": 0,
+          "missing_visible_mean_px": 30.982539355664283
+        },
+        "refined_mean_reprojection_reduction_pct": 66.48742937935516,
         "kind": "real",
-        "label": "new side-camera inference; no ball labels"
+        "label": "Complete public rally chosen from four frozen candidate inferences; 2D labels for evaluation only"
       }
     ]
   },
@@ -4824,9 +4847,140 @@
         }
       },
       "zero_step_encoding": "gray diagonal hatch"
+    },
+    "crop_ablation": {
+      "title": "裁剪对照：只改变检测器输入范围",
+      "values": {
+        "full": {
+          "roi_xywh": [
+            0,
+            0,
+            1280,
+            720
+          ],
+          "recall_success": 10,
+          "recall_denominator": 15,
+          "recall_at20": 0.6666666666666666,
+          "refined_mean_px": 54.00759586218217,
+          "negative_height_frames": 3,
+          "full_frames": 360
+        },
+        "crop_wide": {
+          "roi_xywh": [
+            64,
+            32,
+            1024,
+            576
+          ],
+          "recall_success": 13,
+          "recall_denominator": 15,
+          "recall_at20": 0.8666666666666667,
+          "refined_mean_px": 24.82050928020905,
+          "negative_height_frames": 2,
+          "full_frames": 360
+        },
+        "crop_tight": {
+          "roi_xywh": [
+            128,
+            72,
+            896,
+            504
+          ],
+          "recall_success": 14,
+          "recall_denominator": 15,
+          "recall_at20": 0.9333333333333333,
+          "refined_mean_px": 11.994959736150753,
+          "negative_height_frames": 1,
+          "full_frames": 360
+        }
+      },
+      "evaluated_frames": [
+        100,
+        115,
+        130,
+        145,
+        175,
+        190,
+        205,
+        235,
+        250,
+        265,
+        280,
+        295,
+        310,
+        325,
+        355
+      ],
+      "source_fields": [
+        "crop.rows[arm].metrics.raw_detection.recall_at20",
+        "crop.rows[arm].metrics.refined.mean_px",
+        "crop.rows[arm].metrics.refined.full_clip_negative_height"
+      ],
+      "notes": [
+        "Frozen weights, context192, same 360 frames, same outlier and refinement rules; only the detector ROI differs.",
+        "Fixed 24 sampled frames, 15 visually usable AI-assisted labels; 9 uncertain points excluded identically for all arms.",
+        "Not expert human ground truth; approximately 3–5 source-pixel annotation uncertainty.",
+        "All projections are in original 1280x720 coordinates after inverse background homography.",
+        "Recall is raw detections within <=20 pixels divided by the same 15 labels; misses count as failures.",
+        "Projection scores are averaged on those 15 points; negative-height counts cover all 360 frames.",
+        "No metric three-dimensional ground truth."
+      ]
+    },
+    "demo_candidates": {
+      "title": "4个完整回合：修正前后对照与展示选择",
+      "values": {
+        "public_test1_new1": {
+          "frames": 395,
+          "visible_labeled_frames": 314,
+          "base_mean_px": 39.815049818815396,
+          "refined_mean_px": 20.52476036781888,
+          "refined_negative_height_frames": 0,
+          "selected_for_demo": false
+        },
+        "public_test1_new2": {
+          "frames": 349,
+          "visible_labeled_frames": 328,
+          "base_mean_px": 26.03658887414888,
+          "refined_mean_px": 8.7255302336561,
+          "refined_negative_height_frames": 0,
+          "selected_for_demo": true
+        },
+        "public_test2_new1": {
+          "frames": 298,
+          "visible_labeled_frames": 251,
+          "base_mean_px": 29.91452481082127,
+          "refined_mean_px": 15.696253299600956,
+          "refined_negative_height_frames": 8,
+          "selected_for_demo": false
+        },
+        "public_test2_new2": {
+          "frames": 717,
+          "visible_labeled_frames": 544,
+          "base_mean_px": 23.75537324610647,
+          "refined_mean_px": 12.105567011777552,
+          "refined_negative_height_frames": 8,
+          "selected_for_demo": false
+        }
+      },
+      "frames_total": 1759,
+      "visible_labeled_frames_total": 1437,
+      "selected_case": "public_test1_new2",
+      "source_fields": [
+        "candidates.cases[].base.mean_px",
+        "candidates.cases[].refined.mean_px",
+        "candidates.cases[].refined.negative_height_frames"
+      ],
+      "notes": [
+        "All four frozen candidate rallies shown; best-presenting candidate2 selected for demonstration after scoring, not an unbiased single-case aggregate.",
+        "Four complete rallies from the existing TrackNet dataset family, not cross-dataset generalization evidence.",
+        "Independent human 2D shuttle annotations; no 3D ground truth.",
+        "Projection means use all visible-labeled frames, including detector misses. Negative-height counts use full rallies.",
+        "Detector pretraining overlap for the exact checkpoint is unknown; Test split alone does not establish independence.",
+        "Manual approximate camera, overlap fusion and light refinement; low image error does not prove depth accuracy."
+      ]
     }
   },
-  "side_camera_demonstration": {
+  "previous_side_camera_diagnostic": {
     "status": "PASS",
     "sample": "bba_side_12s",
     "frames": 360,
@@ -4876,5 +5030,886 @@
     "below_ground_frames": 3,
     "quality_status": "exploratory_failed_physical_plausibility",
     "not_a_precision_improvement": true
+  },
+  "demo_selection": {
+    "updated": "2026-11-05",
+    "selected_case": "public_test1_new2",
+    "selected": {
+      "case": "public_test1_new2",
+      "group": "Test/match1",
+      "frames": 349,
+      "fps": 30.0,
+      "duration_seconds": 11.633333333333333,
+      "visible_labeled_frames": 328,
+      "label_alignment": {
+        "rows": 349,
+        "video_frames": 349,
+        "unlabeled_frames": [],
+        "alignment": "Explicit Frame IDs; no temporal shift, no interpolation; unlabeled frames excluded only from accuracy metrics"
+      },
+      "raw_detection": {
+        "detected_frames": 329,
+        "coverage": 0.9426934097421203,
+        "mean_denominator": "visible-labeled AND detected frames",
+        "paired_frames": 322,
+        "mean_px": 15.065316357070373,
+        "median_px": 2.3048861143232218,
+        "p95_px": 24.841075812782755,
+        "recall_at20": 0.926829268292683,
+        "success_at20": 304,
+        "visible_misses": 6
+      },
+      "accepted_detection": {
+        "detected_frames": 317,
+        "coverage": 0.9083094555873925,
+        "paired_frames": 310,
+        "mean_px": 4.9126985750054235,
+        "median_px": 2.284366199428788,
+        "p95_px": 8.696655673822491,
+        "recall_at20": 0.9237804878048781,
+        "success_at20": 303,
+        "visible_misses": 18
+      },
+      "runtime": {
+        "decode_s": 0.10367871500784531,
+        "detector_s": 8.086846139020054,
+        "input_adapter_s": 0.10137548300554045,
+        "base_ctx192_s": 0.00755407300312072,
+        "overlap_s": 0.003264859988121316,
+        "refinement_s": 0.00484169801347889
+      },
+      "wall_s": 8.377719973999774,
+      "calibration": {
+        "fit_rmse_px": 0.8967890894095034,
+        "check_rmse_px": 2.2047074986480664,
+        "assumptions": "Square pixels, zero skew/distortion, principal point at image center; approximate monocular camera, for projection checks only"
+      },
+      "base": {
+        "mean_px": 26.03658887414888,
+        "median_px": 14.906284726879132,
+        "p95_px": 78.74824181851103,
+        "denominator": "All visible-labeled frames, including detector misses",
+        "negative_height_frames": 0,
+        "min_height_m": 0.8392791748046875,
+        "max_height_m": 4.413880348205566,
+        "behind_camera_frames": 0,
+        "missing_visible_mean_px": 41.05948974887721
+      },
+      "refined": {
+        "mean_px": 8.7255302336561,
+        "median_px": 4.531153087303567,
+        "p95_px": 16.730080727634654,
+        "denominator": "All visible-labeled frames, including detector misses",
+        "negative_height_frames": 0,
+        "min_height_m": 0.8616763353347778,
+        "max_height_m": 4.472797393798828,
+        "behind_camera_frames": 0,
+        "missing_visible_mean_px": 30.982539355664283
+      },
+      "refined_mean_reprojection_reduction_pct": 66.48742937935516
+    },
+    "crop": {
+      "status": "PASS",
+      "labels_sha256": "57ad3a939ed94f1230177fcb13dba0d624dcdcd96fe7f9f18e6224c87290e2c8",
+      "annotation": "AI-assisted blind sparse visual diagnostic; not expert human ground truth; approximately 3-5 px uncertainty",
+      "frames_selected": 24,
+      "visible_used": 15,
+      "uncertain_excluded": 9,
+      "coordinate_system": "original 1280x720 source frame; inverse background homography applied to all predictions",
+      "protocol": "Same 360 frames, frozen weights, context192, same outlier rule and refinement. Only detector ROI changes. No labels used for inference.",
+      "real_3d_truth": false,
+      "rows": [
+        {
+          "arm": "full",
+          "roi": [
+            0,
+            0,
+            1280,
+            720
+          ],
+          "full_clip": 360,
+          "evaluated_frames": [
+            100,
+            115,
+            130,
+            145,
+            175,
+            190,
+            205,
+            235,
+            250,
+            265,
+            280,
+            295,
+            310,
+            325,
+            355
+          ],
+          "visible_labels": 15,
+          "metrics": {
+            "raw_detection": {
+              "mean_px": 137.79277337437802,
+              "median_px": 3.979821334565899,
+              "p95_px": 486.8140366194578,
+              "paired_frames": 15,
+              "success_at20": 10,
+              "recall_at20": 0.6666666666666666,
+              "per_frame_errors": [
+                451.9515961293483,
+                279.95838430794174,
+                2.9763163743178156,
+                4.527556961286529,
+                285.9925708852028,
+                2.768651985319933,
+                3.0839674823794248,
+                0.3719278781999288,
+                1.6748747718536765,
+                6.431439304786568,
+                564.0415763119437,
+                1.7954798898596325,
+                3.620917390271774,
+                453.7165196083926,
+                3.979821334565899
+              ]
+            },
+            "accepted_detection": {
+              "mean_px": 73.43875838083231,
+              "median_px": 3.3524424363255996,
+              "p95_px": 411.114623327236,
+              "paired_frames": 12,
+              "success_at20": 10,
+              "recall_at20": 0.6666666666666666,
+              "per_frame_errors": [
+                null,
+                null,
+                2.9763163743178156,
+                4.527556961286529,
+                285.9925708852028,
+                2.768651985319933,
+                3.0839674823794248,
+                0.3719278781999288,
+                1.6748747718536765,
+                6.431439304786568,
+                564.0415763119437,
+                1.7954798898596325,
+                3.620917390271774,
+                null,
+                3.979821334565899
+              ]
+            },
+            "base": {
+              "mean_px": 103.52131467592456,
+              "median_px": 88.72422836387511,
+              "p95_px": 193.67070407119672,
+              "per_frame_errors": [
+                68.80929630029317,
+                142.71939226997583,
+                143.3536421766124,
+                29.023179823771603,
+                68.27624221277127,
+                10.222447113529018,
+                11.184426197324465,
+                169.1430202572339,
+                170.12466485310523,
+                49.02523774223546,
+                185.08611758865322,
+                213.7014058637983,
+                31.590350236921623,
+                88.72422836387511,
+                171.83606913876747
+              ],
+              "full_clip_negative_height": 0
+            },
+            "refined": {
+              "mean_px": 54.00759586218217,
+              "median_px": 8.711250171931205,
+              "p95_px": 198.61943745030646,
+              "per_frame_errors": [
+                82.08486508027423,
+                72.27576691926892,
+                6.593039173322731,
+                5.889937800619293,
+                180.41947130611717,
+                2.4373688063791135,
+                2.664643085849327,
+                11.98539216274136,
+                127.54851534033048,
+                5.994486865412716,
+                241.08602512008167,
+                6.839790663040324,
+                2.250469215793995,
+                53.33291622157016,
+                8.711250171931205
+              ],
+              "full_clip_negative_height": 3
+            }
+          }
+        },
+        {
+          "arm": "crop_wide",
+          "roi": [
+            64,
+            32,
+            1024,
+            576
+          ],
+          "full_clip": 360,
+          "evaluated_frames": [
+            100,
+            115,
+            130,
+            145,
+            175,
+            190,
+            205,
+            235,
+            250,
+            265,
+            280,
+            295,
+            310,
+            325,
+            355
+          ],
+          "visible_labels": 15,
+          "metrics": {
+            "raw_detection": {
+              "mean_px": 52.05342988529838,
+              "median_px": 4.1697567383233505,
+              "p95_px": 337.1694384383327,
+              "paired_frames": 15,
+              "success_at20": 13,
+              "recall_at20": 0.8666666666666667,
+              "per_frame_errors": [
+                1.2958291822294103,
+                2.338543257625847,
+                4.484115863060158,
+                4.274505609611002,
+                286.97615430109323,
+                1.7394399416653226,
+                1.8080060326283398,
+                0.5410107972780882,
+                2.4608220732537385,
+                4.1697567383233505,
+                5.041829053886198,
+                2.71304942159636,
+                4.216213382081161,
+                454.2871014252254,
+                4.45507119991815
+              ]
+            },
+            "accepted_detection": {
+              "mean_px": 23.322453346732168,
+              "median_px": 3.441403079959855,
+              "p95_px": 103.71884289040857,
+              "paired_frames": 14,
+              "success_at20": 13,
+              "recall_at20": 0.8666666666666667,
+              "per_frame_errors": [
+                1.2958291822294103,
+                2.338543257625847,
+                4.484115863060158,
+                4.274505609611002,
+                286.97615430109323,
+                1.7394399416653226,
+                1.8080060326283398,
+                0.5410107972780882,
+                2.4608220732537385,
+                4.1697567383233505,
+                5.041829053886198,
+                2.71304942159636,
+                4.216213382081161,
+                null,
+                4.45507119991815
+              ]
+            },
+            "base": {
+              "mean_px": 73.05659307839866,
+              "median_px": 37.785797483184666,
+              "p95_px": 203.62356780702822,
+              "per_frame_errors": [
+                110.47070014079802,
+                196.96755827775232,
+                152.99455628827477,
+                33.533156972911215,
+                167.09105005430305,
+                3.328550331430323,
+                68.24321511335184,
+                10.671788161390344,
+                7.018698651265762,
+                8.60755857966743,
+                219.15425670867205,
+                7.708801492861146,
+                31.94538705193964,
+                40.32782086817732,
+                37.785797483184666
+              ],
+              "full_clip_negative_height": 1
+            },
+            "refined": {
+              "mean_px": 24.82050928020905,
+              "median_px": 3.138734332169617,
+              "p95_px": 102.22161561182726,
+              "per_frame_errors": [
+                3.138734332169617,
+                9.408375309611255,
+                9.404735755578068,
+                2.631187358431805,
+                282.392839423138,
+                1.8277201439285322,
+                1.5522119077546057,
+                0.9053990717553504,
+                2.37578581613612,
+                4.168191157171751,
+                25.00537683555162,
+                2.665772113990909,
+                2.5563595574822857,
+                19.82478334218484,
+                4.450167078251006
+              ],
+              "full_clip_negative_height": 2
+            }
+          }
+        },
+        {
+          "arm": "crop_tight",
+          "roi": [
+            128,
+            72,
+            896,
+            504
+          ],
+          "full_clip": 360,
+          "evaluated_frames": [
+            100,
+            115,
+            130,
+            145,
+            175,
+            190,
+            205,
+            235,
+            250,
+            265,
+            280,
+            295,
+            310,
+            325,
+            355
+          ],
+          "visible_labels": 15,
+          "metrics": {
+            "raw_detection": {
+              "mean_px": 12.15986214966937,
+              "median_px": 3.0111585896674122,
+              "p95_px": 46.40833890117298,
+              "paired_frames": 15,
+              "success_at20": 14,
+              "recall_at20": 0.9333333333333333,
+              "per_frame_errors": [
+                1.5741604627377235,
+                1.6261210003910953,
+                3.0111585896674122,
+                3.53378170681191,
+                1.2912157890696574,
+                144.53269977918657,
+                3.7604169728071937,
+                1.2254134477072214,
+                2.8503779567807603,
+                4.35504138202452,
+                3.6844551008946165,
+                1.8466926670041404,
+                3.997642013014179,
+                1.0421407456687823,
+                4.066614631274772
+              ]
+            },
+            "accepted_detection": {
+              "mean_px": 12.15986214966937,
+              "median_px": 3.0111585896674122,
+              "p95_px": 46.40833890117298,
+              "paired_frames": 15,
+              "success_at20": 14,
+              "recall_at20": 0.9333333333333333,
+              "per_frame_errors": [
+                1.5741604627377235,
+                1.6261210003910953,
+                3.0111585896674122,
+                3.53378170681191,
+                1.2912157890696574,
+                144.53269977918657,
+                3.7604169728071937,
+                1.2254134477072214,
+                2.8503779567807603,
+                4.35504138202452,
+                3.6844551008946165,
+                1.8466926670041404,
+                3.997642013014179,
+                1.0421407456687823,
+                4.066614631274772
+              ]
+            },
+            "base": {
+              "mean_px": 21.427012480881512,
+              "median_px": 11.520299787301362,
+              "p95_px": 64.38255583950429,
+              "per_frame_errors": [
+                14.808626819056572,
+                3.136501289391726,
+                10.970119447472221,
+                35.69285838700391,
+                8.560738626022728,
+                115.86114907712111,
+                8.187375062810164,
+                21.421244943785148,
+                3.3720272197046697,
+                11.520299787301362,
+                16.07103917545774,
+                8.035712484751002,
+                12.152892154973735,
+                9.29430114355908,
+                42.32030159481148
+              ],
+              "full_clip_negative_height": 0
+            },
+            "refined": {
+              "mean_px": 11.994959736150753,
+              "median_px": 2.5700849737617153,
+              "p95_px": 46.092491955388645,
+              "per_frame_errors": [
+                2.052460720571402,
+                1.5343977604694383,
+                2.5700849737617153,
+                3.053587031512225,
+                1.9083203102291213,
+                143.6047744300166,
+                2.9739128094790686,
+                1.5856025882479217,
+                2.489992933092426,
+                4.149130928895966,
+                3.089095653200256,
+                1.7189930933372475,
+                3.8227633367943015,
+                1.069765720676722,
+                4.301513751976885
+              ],
+              "full_clip_negative_height": 1
+            }
+          }
+        }
+      ]
+    },
+    "public_candidates": {
+      "status": "COMPLETE",
+      "selection_rule": "Frozen two lexicographically-first unused rallies from each Test match before inference; all four scored with no exclusion",
+      "full_rally": true,
+      "context": 192,
+      "adapter": "virtual_full_outlier",
+      "method": "overlap_light_1",
+      "checkpoint_sha256": "7f73fe512b1d0641995018133d4b8125ef2b4c2624c7427b0beefdf92457db51",
+      "prediction_hashes_verified_before_scoring": true,
+      "label_access_audit": "Download/schema audit checked CSV header, Frame IDs, rows and hashes only. No X/Y/Visibility used to choose clips, tune parameters or evaluate before this freeze.",
+      "label_frames_used_as_model_input": false,
+      "recall_definition": "Number of visible-labeled frames with an accepted/raw detection within <=20 source-image pixels divided by all visible-labeled frames. Misses count as failures.",
+      "projection_definition": "XYZ projected with manually fitted approximate camera, compared to independent human 2D shuttle positions on all visible-labeled frames, not a metric 3D error.",
+      "real_3d_accuracy_m": null,
+      "detector_pretraining_overlap": "Unknown for this exact checkpoint; dataset designated Test split is not proof of independence.",
+      "summary": {
+        "frames": 1759,
+        "visible": 1437,
+        "raw_detected": 1547,
+        "accepted_detected": 1512,
+        "raw_success20": 1321,
+        "accepted_success20": 1317,
+        "base_negative_height": 2,
+        "refined_negative_height": 16,
+        "raw_detection": {
+          "mean_px": 14.75947297602658,
+          "median_px": 2.25,
+          "p95_px": 30.16054602657763,
+          "coverage": 0.8794769755542922,
+          "recall_at20": 0.919276270006959
+        },
+        "accepted_detection": {
+          "mean_px": 9.59573443208905,
+          "median_px": 2.23606797749979,
+          "p95_px": 11.244066044371431,
+          "coverage": 0.8595793064241046,
+          "recall_at20": 0.9164926931106472
+        },
+        "base_reprojection": {
+          "mean_px": 28.86109642813286,
+          "median_px": 16.607221213532483,
+          "p95_px": 93.20634714293782
+        },
+        "refined_reprojection": {
+          "mean_px": 13.800930205108669,
+          "median_px": 3.1906337182280007,
+          "p95_px": 50.716619319735614
+        },
+        "prediction_wall_s": 39.98258301700116
+      },
+      "cases": [
+        {
+          "case": "public_test1_new1",
+          "group": "Test/match1",
+          "frames": 395,
+          "fps": 30.0,
+          "duration_seconds": 13.166666666666666,
+          "visible_labeled_frames": 314,
+          "label_alignment": {
+            "rows": 395,
+            "video_frames": 395,
+            "unlabeled_frames": [],
+            "alignment": "Explicit Frame IDs; no temporal shift, no interpolation; unlabeled frames excluded only from accuracy metrics"
+          },
+          "raw_detection": {
+            "detected_frames": 339,
+            "coverage": 0.8582278481012658,
+            "mean_denominator": "visible-labeled AND detected frames",
+            "paired_frames": 313,
+            "mean_px": 18.23117980680545,
+            "median_px": 2.1505813167606567,
+            "p95_px": 82.14225392350997,
+            "recall_at20": 0.9267515923566879,
+            "success_at20": 291,
+            "visible_misses": 1
+          },
+          "accepted_detection": {
+            "detected_frames": 331,
+            "coverage": 0.8379746835443038,
+            "paired_frames": 305,
+            "mean_px": 14.597594928545337,
+            "median_px": 2.1505813167606567,
+            "p95_px": 19.794482831353132,
+            "recall_at20": 0.9203821656050956,
+            "success_at20": 289,
+            "visible_misses": 9
+          },
+          "runtime": {
+            "decode_s": 0.25736500302446075,
+            "detector_s": 8.998081255995203,
+            "input_adapter_s": 0.10653817199636251,
+            "base_ctx192_s": 0.07346870700712316,
+            "overlap_s": 0.014158721984131262,
+            "refinement_s": 0.007290852983715013
+          },
+          "wall_s": 9.54428005698719,
+          "calibration": {
+            "fit_rmse_px": 0.8967890894095034,
+            "check_rmse_px": 2.2047074986480664,
+            "assumptions": "Square pixels, zero skew/distortion, principal point at image center; approximate monocular camera, for projection checks only"
+          },
+          "base": {
+            "mean_px": 39.815049818815396,
+            "median_px": 21.193618266759547,
+            "p95_px": 175.9129333733206,
+            "denominator": "All visible-labeled frames, including detector misses",
+            "negative_height_frames": 0,
+            "min_height_m": 0.44613003730773926,
+            "max_height_m": 5.367462158203125,
+            "behind_camera_frames": 0,
+            "missing_visible_mean_px": 139.32145398255986
+          },
+          "refined": {
+            "mean_px": 20.52476036781888,
+            "median_px": 4.103534271667226,
+            "p95_px": 132.73233792305786,
+            "denominator": "All visible-labeled frames, including detector misses",
+            "negative_height_frames": 0,
+            "min_height_m": 0.04806897044181824,
+            "max_height_m": 5.247385501861572,
+            "behind_camera_frames": 0,
+            "missing_visible_mean_px": 138.5306784341252
+          },
+          "refined_mean_reprojection_reduction_pct": 48.44974334775415
+        },
+        {
+          "case": "public_test1_new2",
+          "group": "Test/match1",
+          "frames": 349,
+          "fps": 30.0,
+          "duration_seconds": 11.633333333333333,
+          "visible_labeled_frames": 328,
+          "label_alignment": {
+            "rows": 349,
+            "video_frames": 349,
+            "unlabeled_frames": [],
+            "alignment": "Explicit Frame IDs; no temporal shift, no interpolation; unlabeled frames excluded only from accuracy metrics"
+          },
+          "raw_detection": {
+            "detected_frames": 329,
+            "coverage": 0.9426934097421203,
+            "mean_denominator": "visible-labeled AND detected frames",
+            "paired_frames": 322,
+            "mean_px": 15.065316357070373,
+            "median_px": 2.3048861143232218,
+            "p95_px": 24.841075812782755,
+            "recall_at20": 0.926829268292683,
+            "success_at20": 304,
+            "visible_misses": 6
+          },
+          "accepted_detection": {
+            "detected_frames": 317,
+            "coverage": 0.9083094555873925,
+            "paired_frames": 310,
+            "mean_px": 4.9126985750054235,
+            "median_px": 2.284366199428788,
+            "p95_px": 8.696655673822491,
+            "recall_at20": 0.9237804878048781,
+            "success_at20": 303,
+            "visible_misses": 18
+          },
+          "runtime": {
+            "decode_s": 0.10367871500784531,
+            "detector_s": 8.086846139020054,
+            "input_adapter_s": 0.10137548300554045,
+            "base_ctx192_s": 0.00755407300312072,
+            "overlap_s": 0.003264859988121316,
+            "refinement_s": 0.00484169801347889
+          },
+          "wall_s": 8.377719973999774,
+          "calibration": {
+            "fit_rmse_px": 0.8967890894095034,
+            "check_rmse_px": 2.2047074986480664,
+            "assumptions": "Square pixels, zero skew/distortion, principal point at image center; approximate monocular camera, for projection checks only"
+          },
+          "base": {
+            "mean_px": 26.03658887414888,
+            "median_px": 14.906284726879132,
+            "p95_px": 78.74824181851103,
+            "denominator": "All visible-labeled frames, including detector misses",
+            "negative_height_frames": 0,
+            "min_height_m": 0.8392791748046875,
+            "max_height_m": 4.413880348205566,
+            "behind_camera_frames": 0,
+            "missing_visible_mean_px": 41.05948974887721
+          },
+          "refined": {
+            "mean_px": 8.7255302336561,
+            "median_px": 4.531153087303567,
+            "p95_px": 16.730080727634654,
+            "denominator": "All visible-labeled frames, including detector misses",
+            "negative_height_frames": 0,
+            "min_height_m": 0.8616763353347778,
+            "max_height_m": 4.472797393798828,
+            "behind_camera_frames": 0,
+            "missing_visible_mean_px": 30.982539355664283
+          },
+          "refined_mean_reprojection_reduction_pct": 66.48742937935516
+        },
+        {
+          "case": "public_test2_new1",
+          "group": "Test/match2",
+          "frames": 298,
+          "fps": 30.0,
+          "duration_seconds": 9.933333333333334,
+          "visible_labeled_frames": 251,
+          "label_alignment": {
+            "rows": 298,
+            "video_frames": 298,
+            "unlabeled_frames": [],
+            "alignment": "Explicit Frame IDs; no temporal shift, no interpolation; unlabeled frames excluded only from accuracy metrics"
+          },
+          "raw_detection": {
+            "detected_frames": 270,
+            "coverage": 0.9060402684563759,
+            "mean_denominator": "visible-labeled AND detected frames",
+            "paired_frames": 233,
+            "mean_px": 16.80208868712881,
+            "median_px": 2.3717082451262845,
+            "p95_px": 126.25022655965296,
+            "recall_at20": 0.8605577689243028,
+            "success_at20": 216,
+            "visible_misses": 18
+          },
+          "accepted_detection": {
+            "detected_frames": 264,
+            "coverage": 0.8859060402684564,
+            "paired_frames": 229,
+            "mean_px": 11.130473899006152,
+            "median_px": 2.358495283014151,
+            "p95_px": 27.85564009523312,
+            "recall_at20": 0.8605577689243028,
+            "success_at20": 216,
+            "visible_misses": 22
+          },
+          "runtime": {
+            "decode_s": 0.10543663200223818,
+            "detector_s": 6.83557203199598,
+            "input_adapter_s": 0.08364168700063601,
+            "base_ctx192_s": 0.006892745004734024,
+            "overlap_s": 0.00309209999977611,
+            "refinement_s": 0.005614683002931997
+          },
+          "wall_s": 7.094156728999224,
+          "calibration": {
+            "fit_rmse_px": 6.4468059803791,
+            "check_rmse_px": 4.526018521501465,
+            "assumptions": "Square pixels, zero skew/distortion, principal point at image center; approximate monocular camera, for projection checks only"
+          },
+          "base": {
+            "mean_px": 29.91452481082127,
+            "median_px": 17.67724469544508,
+            "p95_px": 102.81403478223099,
+            "denominator": "All visible-labeled frames, including detector misses",
+            "negative_height_frames": 2,
+            "min_height_m": -0.08529826998710632,
+            "max_height_m": 3.7669870853424072,
+            "behind_camera_frames": 0,
+            "missing_visible_mean_px": 67.1712193788983
+          },
+          "refined": {
+            "mean_px": 15.696253299600956,
+            "median_px": 2.7044240616319017,
+            "p95_px": 84.85857244134232,
+            "denominator": "All visible-labeled frames, including detector misses",
+            "negative_height_frames": 8,
+            "min_height_m": -0.5509853363037109,
+            "max_height_m": 3.6228084564208984,
+            "behind_camera_frames": 0,
+            "missing_visible_mean_px": 61.49327003038386
+          },
+          "refined_mean_reprojection_reduction_pct": 47.52965858938531
+        },
+        {
+          "case": "public_test2_new2",
+          "group": "Test/match2",
+          "frames": 717,
+          "fps": 30.0,
+          "duration_seconds": 23.9,
+          "visible_labeled_frames": 544,
+          "label_alignment": {
+            "rows": 717,
+            "video_frames": 717,
+            "unlabeled_frames": [],
+            "alignment": "Explicit Frame IDs; no temporal shift, no interpolation; unlabeled frames excluded only from accuracy metrics"
+          },
+          "raw_detection": {
+            "detected_frames": 609,
+            "coverage": 0.8493723849372385,
+            "mean_denominator": "visible-labeled AND detected frames",
+            "paired_frames": 530,
+            "mean_px": 11.625406433730907,
+            "median_px": 2.1505813167606567,
+            "p95_px": 11.802766013285341,
+            "recall_at20": 0.9375,
+            "success_at20": 510,
+            "visible_misses": 14
+          },
+          "accepted_detection": {
+            "detected_frames": 600,
+            "coverage": 0.8368200836820083,
+            "paired_frames": 523,
+            "mean_px": 8.78257635628167,
+            "median_px": 2.1360009363293826,
+            "p95_px": 8.753213630005218,
+            "recall_at20": 0.9356617647058824,
+            "success_at20": 509,
+            "visible_misses": 21
+          },
+          "runtime": {
+            "decode_s": 0.3245340140128974,
+            "detector_s": 13.956155001011211,
+            "input_adapter_s": 0.18873133300803602,
+            "base_ctx192_s": 0.01264213799731806,
+            "overlap_s": 0.009389970975462347,
+            "refinement_s": 0.01054762999410741
+          },
+          "wall_s": 14.618515398004092,
+          "calibration": {
+            "fit_rmse_px": 6.4468059803791,
+            "check_rmse_px": 4.526018521501465,
+            "assumptions": "Square pixels, zero skew/distortion, principal point at image center; approximate monocular camera, for projection checks only"
+          },
+          "base": {
+            "mean_px": 23.75537324610647,
+            "median_px": 15.073414181362676,
+            "p95_px": 57.63584483270761,
+            "denominator": "All visible-labeled frames, including detector misses",
+            "negative_height_frames": 0,
+            "min_height_m": 0.15477672219276428,
+            "max_height_m": 4.397570610046387,
+            "behind_camera_frames": 0,
+            "missing_visible_mean_px": 85.0361145711952
+          },
+          "refined": {
+            "mean_px": 12.105567011777552,
+            "median_px": 2.448054466519308,
+            "p95_px": 38.337836896369716,
+            "denominator": "All visible-labeled frames, including detector misses",
+            "negative_height_frames": 8,
+            "min_height_m": -0.6227706074714661,
+            "max_height_m": 4.285375118255615,
+            "behind_camera_frames": 0,
+            "missing_visible_mean_px": 85.6809982092713
+          },
+          "refined_mean_reprojection_reduction_pct": 49.04072065564507
+        }
+      ],
+      "prediction_hashes_unchanged_after_scoring": true
+    },
+    "sources": [
+      {
+        "case": "public_test1_new1",
+        "member": "Test/match1/video/1_05_03.mp4",
+        "source_url": "https://github.com/AnInsomniacy/tracknet-series-pytorch/releases/download/dataset-v1.0.0/Shuttlecock-Trajectory-Dataset.zip",
+        "original_dataset": "https://hackmd.io/Nf8Rh1NrSrqNUzmO0sQKZw",
+        "width": 1280,
+        "height": 720,
+        "fps": 30.0,
+        "frames": 395,
+        "sha256": "7e14af2bb703a627c0d7ee8345b40a53f090da5b7ddb4154e0082c38428112e7",
+        "label_member": "Test/match1/csv/1_05_03_ball.csv",
+        "label_sha256": "a8ad0e3838885c7dffa3315ce88a0275c6f6d76a8543b88be2d35817fa5f339a"
+      },
+      {
+        "case": "public_test1_new2",
+        "member": "Test/match1/video/1_06_03.mp4",
+        "source_url": "https://github.com/AnInsomniacy/tracknet-series-pytorch/releases/download/dataset-v1.0.0/Shuttlecock-Trajectory-Dataset.zip",
+        "original_dataset": "https://hackmd.io/Nf8Rh1NrSrqNUzmO0sQKZw",
+        "width": 1280,
+        "height": 720,
+        "fps": 30.0,
+        "frames": 349,
+        "sha256": "7cc3a48db27f2e9436822c3a9742557a3988caae89f22e017b99061cc028fa30",
+        "label_member": "Test/match1/csv/1_06_03_ball.csv",
+        "label_sha256": "3444e4ad43ebd00cc1b9d586d20dd548361481ae2c5fecfa21f39593495f14d4"
+      },
+      {
+        "case": "public_test2_new1",
+        "member": "Test/match2/video/1_04_04.mp4",
+        "source_url": "https://github.com/AnInsomniacy/tracknet-series-pytorch/releases/download/dataset-v1.0.0/Shuttlecock-Trajectory-Dataset.zip",
+        "original_dataset": "https://hackmd.io/Nf8Rh1NrSrqNUzmO0sQKZw",
+        "width": 1280,
+        "height": 720,
+        "fps": 30.0,
+        "frames": 298,
+        "sha256": "4ec08d7b44c9dacb3ee086a3ff17ee4af50a50c86e18294dfa4791e95b06173f",
+        "label_member": "Test/match2/csv/1_04_04_ball.csv",
+        "label_sha256": "afedda62cbe0b9deb94f0a1be306af517291317245498a134037644a9c146773"
+      },
+      {
+        "case": "public_test2_new2",
+        "member": "Test/match2/video/1_11_11.mp4",
+        "source_url": "https://github.com/AnInsomniacy/tracknet-series-pytorch/releases/download/dataset-v1.0.0/Shuttlecock-Trajectory-Dataset.zip",
+        "original_dataset": "https://hackmd.io/Nf8Rh1NrSrqNUzmO0sQKZw",
+        "width": 1280,
+        "height": 720,
+        "fps": 30.0,
+        "frames": 717,
+        "sha256": "fb2f0fd47948782f2c8e423bb9e3f683eae63c269e181b454a267a4a83473fe9",
+        "label_member": "Test/match2/csv/1_11_11_ball.csv",
+        "label_sha256": "3768802bc6f898676ee0cefddff83d88d765bab52be9bf43e51f5363074adb77"
+      }
+    ],
+    "source_hashes": {
+      "crop_evaluation.json": "e5225b17b1896632587e4ea241433849404db71c77fc1c90f9450a0935f6b178",
+      "evaluation.json": "675dd9c34a012ce2035b7073947a22f6ec2f5af350e52d19d46378be4af42c8c",
+      "sources.json": "b504b22836187de2a1aa0b422115e097db7d6268e7c409ce9d4dc40e623fe9d8"
+    },
+    "selection": "All four candidate whole rallies were frozen before scoring; best demonstration selected afterwards. This is selection for presentation, not an independent held-out test.",
+    "data_scope": "Newly downloaded rallies from the existing TrackNet dataset family; not a new independent dataset. Detector pretraining overlap is unknown.",
+    "real_3d_truth": false
   }
 }

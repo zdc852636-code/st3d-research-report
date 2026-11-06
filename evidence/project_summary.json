@@ -4927,7 +4927,7 @@
       ]
     },
     "demo_candidates": {
-      "title": "4个完整回合：修正前后对照与展示选择",
+      "title": "4个完整回合：二维误差不能代表三维正确",
       "values": {
         "public_test1_new1": {
           "frames": 395,
@@ -4935,7 +4935,7 @@
           "base_mean_px": 39.815049818815396,
           "refined_mean_px": 20.52476036781888,
           "refined_negative_height_frames": 0,
-          "selected_for_demo": false
+          "retained_as_failed_case": false
         },
         "public_test1_new2": {
           "frames": 349,
@@ -4943,7 +4943,7 @@
           "base_mean_px": 26.03658887414888,
           "refined_mean_px": 8.7255302336561,
           "refined_negative_height_frames": 0,
-          "selected_for_demo": true
+          "retained_as_failed_case": true
         },
         "public_test2_new1": {
           "frames": 298,
@@ -4951,7 +4951,7 @@
           "base_mean_px": 29.91452481082127,
           "refined_mean_px": 15.696253299600956,
           "refined_negative_height_frames": 8,
-          "selected_for_demo": false
+          "retained_as_failed_case": false
         },
         "public_test2_new2": {
           "frames": 717,
@@ -4959,7 +4959,7 @@
           "base_mean_px": 23.75537324610647,
           "refined_mean_px": 12.105567011777552,
           "refined_negative_height_frames": 8,
-          "selected_for_demo": false
+          "retained_as_failed_case": false
         }
       },
       "frames_total": 1759,
@@ -4971,7 +4971,7 @@
         "candidates.cases[].refined.negative_height_frames"
       ],
       "notes": [
-        "All four frozen candidate rallies shown; best-presenting candidate2 selected for demonstration after scoring, not an unbiased single-case aggregate.",
+        "All four frozen candidate rallies shown. Candidate2 withdrawn as a successful demonstration after visible 3D contradiction; retained as failure diagnostic.",
         "Four complete rallies from the existing TrackNet dataset family, not cross-dataset generalization evidence.",
         "Independent human 2D shuttle annotations; no 3D ground truth.",
         "Projection means use all visible-labeled frames, including detector misses. Negative-height counts use full rallies.",
@@ -5032,7 +5032,7 @@
     "not_a_precision_improvement": true
   },
   "demo_selection": {
-    "updated": "2026-11-05",
+    "updated": "2026-11-06",
     "selected_case": "public_test1_new2",
     "selected": {
       "case": "public_test1_new2",
@@ -5908,7 +5908,23 @@
       "evaluation.json": "675dd9c34a012ce2035b7073947a22f6ec2f5af350e52d19d46378be4af42c8c",
       "sources.json": "b504b22836187de2a1aa0b422115e097db7d6268e7c409ce9d4dc40e623fe9d8"
     },
-    "selection": "All four candidate whole rallies were frozen before scoring; best demonstration selected afterwards. This is selection for presentation, not an independent held-out test.",
+    "selection": "Previously selected by 2D statistics; withdrawn as a successful demonstration after visible 3D failure review. Retained as a failure case, not a validated real 3D reconstruction.",
+    "validation_status": "FAILED_VISUAL_3D_PLAUSIBILITY",
+    "failure": {
+      "frame": 348,
+      "time_seconds": 11.6,
+      "predicted_xyz_m": [
+        3.279740333557129,
+        -4.18264102935791,
+        2.8360435962677
+      ],
+      "visible_evidence": "Shuttle visible on floor near far baseline, while prediction remains airborne in near half. No measured 3D labels are required to reject this qualitative contradiction.",
+      "labels_2d_px": [
+        895,
+        276
+      ],
+      "reprojection_error_px": 12.24105593464321
+    },
     "data_scope": "Newly downloaded rallies from the existing TrackNet dataset family; not a new independent dataset. Detector pretraining overlap is unknown.",
     "real_3d_truth": false
   }

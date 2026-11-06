@@ -4442,30 +4442,32 @@
     "script_sha256": "90e97dc6412947b83f1de714d74e53e02b88424c3aca1dbd925c1c3b29d64632",
     "videos": [
       {
-        "file": "synthetic_2d3d.mp4",
-        "frames": 116,
-        "fps": 15,
-        "duration_seconds": 7.733333333333333,
-        "original_frames": 232,
-        "original_fps": 30.0,
-        "display_sampling": "nearest source frame at15fps; original duration retained",
-        "sha256": "099c3f9696af3d53cdc916e881444a3053e41978611ef6d9a016b67a8174e7d1",
-        "decoded_all_frames": true,
         "kind": "synthetic",
-        "sample": "fw-test-00000",
-        "mean_3d_cm": 23.067991544174266,
-        "p95_3d_cm": 43.71045429992611,
-        "prediction_checkpoint_sha256": "7f73fe512b1d0641995018133d4b8125ef2b4c2624c7427b0beefdf92457db51",
-        "source_prediction_sha256": "8da78f9afa6bc53e17e3c81186dcbcf9c60d2701b9d4eaf486d3fe03c4495e79",
-        "display_scene": "Calibrated projection of the same court and physical XYZ; illustrative scene only, network input remains stored local crop and heatmap.",
-        "camera_zoom": {
-          "center_px": [
-            966.3708638419857,
-            568.3056430149621
-          ],
-          "uniform_display_scale": 1.7066614831084679
-        },
-        "params": 1929971
+        "sample": "fw-test-00059",
+        "frames": 375,
+        "fps": 30,
+        "duration_seconds": 12.5,
+        "mean_3d_cm": 10.680098533630371,
+        "p95_3d_cm": 28.504613876342773,
+        "max_3d_cm": 31.64545249938965,
+        "missing_mean_3d_cm": 10.727982521057129,
+        "missing_frames": 18,
+        "provenance": {
+          "source": "data/st3d_fastweight_20261029/rallies/fw-test-00059/view0.npz",
+          "source_sha256": "beeb4cae687039d3a4e369b463a51ca73c65f3f50471fb101baff4b3ee185ec9",
+          "labels_sha256": "076b4e64de99f3d3ae356f2303eef4000d8321d63dd58493cce991720b995992",
+          "masks_sha256": "e5e8ceae7c38190c2e0c051a96d64bc9ebe6b5586c95aaa5e30a0505f25e9750",
+          "saved_prediction": "reports/st3d_fastweight_20261029/test/original_predictions.npz",
+          "saved_prediction_key": "fw-test-00059-v0-normal",
+          "saved_prediction_sha256": "8c85a42b57bdd67265c120addf34da1984d98acb95d50eaa93f2730ad1832871",
+          "checkpoint_sha256": "7f73fe512b1d0641995018133d4b8125ef2b4c2624c7427b0beefdf92457db51",
+          "no_inference": true,
+          "no_prediction_changes": true,
+          "original_scene": "No original full-frame simulation video was saved. Court and shuttle are a calibrated explanatory rendering. The small crop is the actual saved model input.",
+          "observations": "Actual saved normal-condition synthetic observation mask, crop and heatmap; not a new detector run.",
+          "labels_usage": "Evaluation and separate green reference only. Blue coordinates are the saved network prediction.",
+          "selection": "Selected retrospectively for demonstration from 128 test rallies x 2 views; low-error complete example, not an independent test or average result. Replaces a poor real demonstration without claiming real depth improvement."
+        }
       },
       {
         "case": "public_test1_new2",
@@ -4541,7 +4543,7 @@
         },
         "refined_mean_reprojection_reduction_pct": 66.48742937935516,
         "kind": "real",
-        "label": "Complete public rally chosen from four frozen candidate inferences; 2D labels for evaluation only"
+        "label": "Withdrawn failed real example retained inside diagnostic disclosure; not a successful 3D reconstruction"
       }
     ]
   },
@@ -5927,5 +5929,43 @@
     },
     "data_scope": "Newly downloaded rallies from the existing TrackNet dataset family; not a new independent dataset. Detector pretraining overlap is unknown.",
     "real_3d_truth": false
+  },
+  "example_review": {
+    "status": "PASS_NUMERIC_AND_VISUAL_REVIEW",
+    "sample": "fw-test-00059",
+    "condition": "normal",
+    "frames": 375,
+    "seconds": 12.5,
+    "metrics": {
+      "mean_3d_cm": 10.680098533630371,
+      "p95_3d_cm": 28.504613876342773,
+      "max_3d_cm": 31.64545249938965,
+      "missing_mean_3d_cm": 10.727982521057129,
+      "missing_frames": 18
+    },
+    "truth_in_image_frames": 375,
+    "min_predicted_height_m": 0.045392438769340515,
+    "min_true_height_m": 5.477562847744366e-14,
+    "prediction_coordinates_unchanged": true,
+    "source_prediction_sha256": "8c85a42b57bdd67265c120addf34da1984d98acb95d50eaa93f2730ad1832871",
+    "checkpoint_sha256": "7f73fe512b1d0641995018133d4b8125ef2b4c2624c7427b0beefdf92457db51",
+    "selection": "Selected retrospectively for demonstration from 128 test rallies x 2 views; low-error complete example, not an independent test or average result. Replaces a poor real demonstration without claiming real depth improvement.",
+    "visual_review": "AI inspected saved-prediction versus truth in 3D, plan view, longitudinal profile and per-frame error; continuous complete rally retained.",
+    "real_review": {
+      "available_predictions": 50,
+      "model": "ST3D-Prime 1.0",
+      "checkpoint_sha256": "83940e01de3c7b8af6f494a90be92277c60367a98984dddc7d2bb0d0cf4182be",
+      "visual_candidates": [
+        "new4_r1",
+        "holdout_m1",
+        "new2_r1",
+        "MS_top",
+        "new3_r1",
+        "match306_000"
+      ],
+      "result": "No whole-rally candidate qualified for main demonstration in this review",
+      "method": "Numerical screen followed by AI visual inspection of sampled source frames, aligned saved XYZ, full paths; denser review on new4_r1 frames 130 to 240. Not exhaustive frame-by-frame visual verification of all 50 clips.",
+      "real_3d_truth": false
+    }
   }
 }

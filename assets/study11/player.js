@@ -36,6 +36,8 @@
       cases.forEach(x=>this.select.add(new Option(x.title,x.key)));
       this.select.onchange=()=>this.load(this.select.value);
       this.el("play").onclick=()=>this.togglePlay();
+      this.el("home")?.addEventListener("click",()=>this.seek(this.lo));
+      this.el("rate")?.addEventListener("change",()=>{if(this.video)this.video.playbackRate=Number(this.el("rate").value);});
       this.slider.oninput=()=>this.seek(Number(this.slider.value));
       this.el("prev").onclick=()=>this.seek(this.frame-1);this.el("next").onclick=()=>this.seek(this.frame+1);
       this.el("scope")?.addEventListener("change",()=>{if(this.data){this.bounds();this.seek(this.lo);}});
@@ -48,6 +50,10 @@
       this.world.onpointerdown=e=>{if(e.button===0){this.world.setPointerCapture(e.pointerId);this.drag=[e.clientX,e.clientY];}};
       this.world.onpointermove=e=>{if(this.drag){this.yaw+=(e.clientX-this.drag[0])*.012;this.pitch=clamp(this.pitch+(e.clientY-this.drag[1])*.009,.04,1.55);this.view="custom";this.drag=[e.clientX,e.clientY];this.drawWorld();}};
       this.world.onlostpointercapture=this.world.onpointerup=this.world.onpointercancel=()=>{this.drag=null;};
+      this.world.addEventListener("wheel",e=>{
+        e.preventDefault();this.zoom=clamp(this.zoom*Math.exp(-e.deltaY*.001),.7,2);
+        this.el("zoom").value=this.zoom;this.drawWorld();
+      },{passive:false});
       this.world.onkeydown=e=>{if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key)){e.preventDefault();this.yaw+=({"ArrowLeft":-.1,"ArrowRight":.1}[e.key]||0);this.pitch=clamp(this.pitch+({"ArrowUp":.1,"ArrowDown":-.1}[e.key]||0),.04,1.55);this.view="custom";this.drawWorld();}};
       new ResizeObserver(()=>this.draw()).observe(section);
       this.load(cases[0].key);
@@ -62,7 +68,16 @@
         const spec=this.cases.find(x=>x.key===key);
         const response=await fetch(new URL(spec.file,rootURL));if(!response.ok)throw Error("坐标文件未载入");
         const d=await response.json();if(ticket!==this.ticket)return;
+        if(this.sim&&this.el("crop")){
+          const tiles=await Promise.all(["crop","heat"].map(async kind=>{
+            const image=new Image();image.src=new URL(key+"_"+kind+".png",rootURL);
+            await image.decode();return image;
+          }));
+          if(ticket!==this.ticket)return;
+          this.tiles=tiles;
+        }
         const v=document.createElement("video");v.muted=true;v.playsInline=true;v.preload="auto";v.setAttribute("aria-label",spec.title+"的原始画面");
+        v.playbackRate=Number(this.el("rate")?.value||1);
         this.el("original").replaceChildren(v);this.video=v;
         await new Promise((ok,fail)=>{v.onloadeddata=ok;v.onerror=()=>fail(Error("录像未载入"));v.onemptied=()=>{if(ticket!==this.ticket)ok();};v.src=new URL(d.video,rootURL);v.load();});
         if(ticket!==this.ticket)return;
@@ -81,6 +96,11 @@
         }else{const watch=()=>{if(ticket!==this.ticket)return;if(!v.paused)update(v.currentTime);requestAnimationFrame(watch);};requestAnimationFrame(watch);}
         this.seek(this.frame);this.root.dataset.ready="true";this.root.querySelectorAll("button,input").forEach(x=>x.disabled=false);
         this.el("status").textContent=this.sim?"该机位三维平均误差 "+(d.metric/100).toFixed(2)+" 米":"选段二维定位误差 "+d.metric.toFixed(2)+" 像素";
+        if(this.sim&&this.el("crop")){
+          const stats=this.root.closest("section");
+          stats.querySelector("[data-stat=mean]").textContent=(d.metric/100).toFixed(2)+" m";
+          stats.querySelector("[data-stat=observed]").textContent=d.obs.filter(Boolean).length+" 帧";
+        }
         this.el("play").textContent="播放";this.draw();
       }catch(err){if(ticket===this.ticket){this.el("status").textContent=err.message;this.root.dataset.ready="error";}}
     }
@@ -89,7 +109,14 @@
       try{await this.video.play();}catch(err){this.el("status").textContent="播放未开始，请再点击播放。";}}
     draw(){
       if(!this.data)return;
-      this.slider.value=this.frame;this.el("clock").textContent=(this.frame/this.data.fps).toFixed(2)+" s · "+(this.frame-this.lo+1)+" / "+(this.hi-this.lo+1)+" 帧";
+      this.slider.value=this.frame;this.el("clock").textContent=(this.frame/this.data.fps).toFixed(2)+" / "+(this.hi/this.data.fps).toFixed(2)+" s";
+      if(this.el("frame"))this.el("frame").textContent="第 "+(this.frame-this.lo+1)+" / "+(this.hi-this.lo+1)+" 帧";
+      if(this.tiles){
+        ["crop","heat"].forEach((key,k)=>{
+          const ctx=this.el(key).getContext("2d");
+          ctx.drawImage(this.tiles[k],(this.frame%16)*24,Math.floor(this.frame/16)*24,24,24,0,0,24,24);
+        });
+      }
       this.root.dataset.frame=this.frame;this.drawCamera();this.drawWorld();
     }
     drawCamera(){

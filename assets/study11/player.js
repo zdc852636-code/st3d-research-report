@@ -33,7 +33,13 @@
       this.view="diagonal";[this.yaw,this.pitch]=views.diagonal;
       this.el=(key)=>section.querySelector('[data-ui="'+key+'"]');
       this.select=this.el("case");this.slider=this.el("seek");this.world=this.el("world");
-      cases.forEach(x=>this.select.add(new Option(x.title,x.key)));
+      if(this.sim && cases.some(x=>x.family==="training")){
+        for(const [training,label] of [[true,"重建网络训练样本"],[false,"完整视频测试 · 实拍背景合成球"]]){
+          const group=document.createElement("optgroup");group.label=label;
+          cases.filter(x=>(x.family==="training")===training).forEach(x=>group.append(new Option(x.title,x.key)));
+          this.select.append(group);
+        }
+      }else cases.forEach(x=>this.select.add(new Option(x.title,x.key)));
       this.select.onchange=()=>this.load(this.select.value);
       this.el("play").onclick=()=>this.togglePlay();
       this.el("home")?.addEventListener("click",()=>this.seek(this.lo));
@@ -60,7 +66,7 @@
     }
     bounds(){[this.lo,this.hi]=this.sim||this.el("scope")?.checked?[0,this.data.n-1]:this.data.focus;this.slider.min=this.lo;this.slider.max=this.hi;}
     async load(key){
-      const ticket=++this.ticket, initial=this.sim?this.frame:0;
+      const ticket=++this.ticket, previous=this.data, initial=this.sim?this.frame:0;
       this.video?.pause();this.video?.removeAttribute("src");this.video?.load();this.video=null;this.data=null;
       this.root.dataset.ready="loading";this.el("status").textContent="正在载入录像…";
       this.root.querySelectorAll("button,input").forEach(x=>x.disabled=true);
@@ -81,7 +87,10 @@
         this.el("original").replaceChildren(v);this.video=v;
         await new Promise((ok,fail)=>{v.onloadeddata=ok;v.onerror=()=>fail(Error("录像未载入"));v.onemptied=()=>{if(ticket!==this.ticket)ok();};v.src=new URL(d.video,rootURL);v.load();});
         if(ticket!==this.ticket)return;
-        this.data=d;this.bounds();this.frame=clamp(this.sim?initial:this.lo,this.lo,this.hi);this.target=this.frame;
+        this.data=d;this.bounds();
+        const sameRally=this.sim && previous && (previous.kind==="training")===(d.kind==="training");
+        this.frame=clamp(sameRally?initial:this.lo,this.lo,this.hi);this.target=this.frame;
+        if(this.sim && this.el("input-title"))this.showSource(d.kind==="training");
         v.onplay=()=>{this.el("play").textContent="暂停";window.dispatchEvent(new CustomEvent("replay-playing",{detail:v}));};
         v.onpause=()=>{this.el("play").textContent="播放";};
         v.onended=()=>{this.frame=this.hi;this.draw();};v.onseeked=()=>{if(ticket===this.ticket){this.target=null;this.frame=clamp(Math.floor(v.currentTime*d.fps+.001),this.lo,this.hi);this.draw();}};
@@ -95,14 +104,33 @@
           const watch=(_,m)=>{if(ticket!==this.ticket)return;update(m.mediaTime);v.requestVideoFrameCallback(watch);};v.requestVideoFrameCallback(watch);
         }else{const watch=()=>{if(ticket!==this.ticket)return;if(!v.paused)update(v.currentTime);requestAnimationFrame(watch);};requestAnimationFrame(watch);}
         this.seek(this.frame);this.root.dataset.ready="true";this.root.querySelectorAll("button,input").forEach(x=>x.disabled=false);
-        this.el("status").textContent=this.sim?"该机位三维平均误差 "+(d.metric/100).toFixed(2)+" 米":"选段二维定位误差 "+d.metric.toFixed(2)+" 像素";
+        this.el("status").textContent=d.kind==="training"?"全网络微调 · 第 "+d.source.update.toLocaleString("zh-CN")+" 次更新使用的样本":
+          this.sim?"该机位三维平均误差 "+(d.metric/100).toFixed(2)+" 米":"选段二维定位误差 "+d.metric.toFixed(2)+" 像素";
         if(this.sim&&this.el("crop")){
           const stats=this.root.closest("section");
           stats.querySelector("[data-stat=mean]").textContent=(d.metric/100).toFixed(2)+" m";
           stats.querySelector("[data-stat=observed]").textContent=d.obs.filter(Boolean).length+" 帧";
+          const frames=stats.querySelector("[data-stat=frames]");
+          if(frames)frames.textContent=d.n+" 帧";
         }
         this.el("play").textContent="播放";this.draw();
       }catch(err){if(ticket===this.ticket){this.el("status").textContent=err.message;this.root.dataset.ready="error";}}
+    }
+    showSource(training){
+      this.root.dataset.source=training?"training":"test";
+      this.el("heading").textContent=training?"训练输入与重建结果":"完整视频测试 · 检测与重建";
+      this.el("input-title").textContent=training?"局部灰度图与热图":"仿真相机画面";
+      this.el("geometry-title").textContent=training?"球点与球场坐标":"识别与球场标定";
+      this.el("output-title").textContent=training?"时序网络输出":"五轮修正后的轨迹";
+      const heat=this.el("heat").closest(".tri-crop");
+      const origin=this.el("original").parentElement, overlay=this.el("overlay").parentElement;
+      (training?origin:overlay).append(heat);
+      this.el("crop").nextElementSibling.textContent=training?"灰度图 · 24 × 24":"24 × 24 输入图像";
+      this.el("heat").nextElementSibling.textContent=training?"热图 · 亮度放大":"输入热图";
+      this.el("description").textContent=training?
+        "左图逐像素回放训练时的灰度小图和热图。中图按保存的二维坐标绘制球点、网顶和场地标定点。右图用训练结束的时序网络重算，绿线为仿真真值。":
+        "实拍视频的静态背景上叠加了仿真羽毛球。四个机位各自运行检测、时序重建和五轮修正，可在同一帧切换。";
+      this.root.closest("section").querySelector("[data-stat=metric-label]").textContent=training?"训练样本平均三维误差":"测试机位平均三维误差";
     }
     seek(index){if(!this.data)return;const f=clamp(index,this.lo,this.hi);this.video.pause();this.frame=f;this.target=f;this.video.currentTime=(f+.08)/this.data.fps;this.draw();}
     async togglePlay(){if(!this.data)return;if(!this.video.paused)return this.video.pause();if(this.frame>=this.hi)this.seek(this.lo);
@@ -117,13 +145,23 @@
           ctx.drawImage(this.tiles[k],(this.frame%16)*24,Math.floor(this.frame/16)*24,24,24,0,0,24,24);
         });
       }
+      if(this.data.kind==="training")this.el("mask").textContent=this.data.obs[this.frame]?"有球点观测":"该帧缺少观测 · 两路输入均为零";
       this.root.dataset.frame=this.frame;this.drawCamera();this.drawWorld();
     }
     drawCamera(){
       const a=context(this.el("overlay"));if(!a)return;const {c,w,h}=a,d=this.data,i=this.frame;
-      const s=Math.min(w/d.w,h/d.h),ox=(w-s*d.w)/2,oy=(h-s*d.h)/2,xy=p=>[ox+p[0]*s,oy+p[1]*s];
-      c.fillStyle="#12202c";c.fillRect(0,0,w,h);if(this.video.readyState>=2)c.drawImage(this.video,ox,oy,d.w*s,d.h*s);
-      c.save();c.beginPath();c.rect(ox,oy,d.w*s,d.h*s);c.clip();
+      const training=d.kind==="training";
+      let left=0,top=0,width=d.w,height=d.h;
+      if(training){
+        const pts=d.court.anchors.concat(d.obs.filter(Boolean)),xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);
+        left=Math.min(...xs);top=Math.min(...ys);width=Math.max(...xs)-left;height=Math.max(...ys)-top;
+        left-=width*.07;top-=height*.09;width*=1.14;height*=1.18;
+      }
+      const s=Math.min(w/width,h/height),ox=(w-s*width)/2,oy=(h-s*height)/2;
+      const xy=p=>[ox+(p[0]-left)*s,oy+(p[1]-top)*s];
+      c.fillStyle=training?"#173943":"#12202c";c.fillRect(0,0,w,h);
+      if(!training&&this.video.readyState>=2)c.drawImage(this.video,ox,oy,d.w*s,d.h*s);
+      c.save();c.beginPath();c.rect(ox,oy,width*s,height*s);c.clip();
       if(this.el("cal").checked){
         for(const pts of d.court.floor)line(c,pts.map(xy),colors.court,1.25);
         for(const pts of d.court.net)line(c,pts.map(xy),colors.net,1.25,[4,3]);
@@ -152,7 +190,7 @@
       this.el("height").textContent="高度 "+cur[2].toFixed(2)+" m";
     }
   }
-  fetch(new URL("cases.json",rootURL)).then(r=>{if(!r.ok)throw Error();return r.json();}).then(cases=>{
+  fetch(new URL("cases.json?v=training-inputs",rootURL)).then(r=>{if(!r.ok)throw Error();return r.json();}).then(cases=>{
     document.querySelectorAll(".replay").forEach(s=>{const viewer=new Replay(s,cases.filter(x=>x.group===s.dataset.group));
       window.addEventListener("replay-playing",e=>{if(viewer.video!==e.detail)viewer.video?.pause();});});
   }).catch(()=>document.querySelectorAll('[data-ui="status"]').forEach(s=>s.textContent="回放目录载入失败，请刷新。"));

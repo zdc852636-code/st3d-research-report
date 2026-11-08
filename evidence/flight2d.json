@@ -1,0 +1,115 @@
+{
+  "tag": "c7710aa2c1bc30",
+  "model": "image-reacquisition",
+  "acceptance": "NOT_MET",
+  "live_profile_changed": false,
+  "cohorts": {
+    "all": {
+      "prior": {
+        "clips": 28,
+        "frames": 13156,
+        "correct": 10923,
+        "visible": 11047,
+        "flags": 173,
+        "large": 62,
+        "medium": 122,
+        "gap": 43,
+        "spike": 8,
+        "precision": 0.9340687532067727,
+        "recall": 0.988775233094958,
+        "fast_ref": 520,
+        "fast_retained": 520
+      },
+      "new": {
+        "clips": 28,
+        "frames": 13156,
+        "correct": 10940,
+        "visible": 11047,
+        "flags": 38,
+        "large": 3,
+        "medium": 25,
+        "gap": 4,
+        "spike": 9,
+        "precision": 0.9604916593503073,
+        "recall": 0.9903141124287137,
+        "fast_ref": 520,
+        "fast_retained": 495
+      }
+    },
+    "first24": {
+      "prior": {
+        "clips": 24,
+        "frames": 11389,
+        "correct": 9402,
+        "visible": 9522,
+        "flags": 148,
+        "large": 52,
+        "medium": 104,
+        "gap": 37,
+        "spike": 7,
+        "precision": 0.9372943873990629,
+        "recall": 0.9873976055450535,
+        "fast_ref": 473,
+        "fast_retained": 473
+      },
+      "new": {
+        "clips": 24,
+        "frames": 11389,
+        "correct": 9420,
+        "visible": 9522,
+        "flags": 28,
+        "large": 0,
+        "medium": 17,
+        "gap": 4,
+        "spike": 7,
+        "precision": 0.9649661954517517,
+        "recall": 0.9892879647132955,
+        "fast_ref": 473,
+        "fast_retained": 451
+      }
+    },
+    "confirmation": {
+      "prior": {
+        "clips": 4,
+        "frames": 1767,
+        "correct": 1521,
+        "visible": 1525,
+        "flags": 25,
+        "large": 10,
+        "medium": 18,
+        "gap": 6,
+        "spike": 1,
+        "precision": 0.9146121467227901,
+        "recall": 0.9973770491803279,
+        "fast_ref": 47,
+        "fast_retained": 47
+      },
+      "new": {
+        "clips": 4,
+        "frames": 1767,
+        "correct": 1520,
+        "visible": 1525,
+        "flags": 10,
+        "large": 3,
+        "medium": 8,
+        "gap": 0,
+        "spike": 2,
+        "precision": 0.9336609336609336,
+        "recall": 0.9967213114754099,
+        "fast_ref": 47,
+        "fast_retained": 44
+      }
+    }
+  },
+  "zero_flag_clips": 14,
+  "source_sha256": "b7803c26e69de2693de8e9808c03c6ed257accbee050f4e38f9d8b1a85d045ad",
+  "example_time_s": 0.36,
+  "example_distance_1280px": [
+    198.8375537970632,
+    1.2986916493148195
+  ],
+  "real_3d_ground_truth": false,
+  "annotations_used_for": "evaluation and display only",
+  "detection_audit_sha256": "c28fb82ed05382b44a6a77c78ce476f75756fc9000c9e586e5138731091da6df",
+  "observations_sha256": "91b6a76c83179a7584e3c8f7c3f22816c8b3d43ddf04a6976c7183c06b1d1d32"
+}

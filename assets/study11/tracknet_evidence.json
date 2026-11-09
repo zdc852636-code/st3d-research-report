@@ -1,0 +1,38 @@
+{
+  "release": "ST3D 1.2",
+  "official_repository": "https://github.com/qaz812345/TrackNetV3",
+  "official_weight_file": "TrackNet_best.pt",
+  "deployed_detector_weight_sha256": "df867641a02712b021f04548ff4b1208ddfdb47f629ab2094ceb978667e83b1a",
+  "pretraining_3d_physical_trajectories": 2600000,
+  "detector_finetuning": {
+    "train_match_directories": 7,
+    "train_clips": 28,
+    "updates": 1728,
+    "selected_update": 576,
+    "development_heatmap_f1_before": 0.9811320754716981,
+    "development_heatmap_f1_best": 0.9813132178981656,
+    "development_heatmap_f1_last": 0.9741056218057922,
+    "complete_frontend_selected": "deployed_original",
+    "candidate_weights_sha256": "709cd45ac21f9832fb528c40305186dcbdd28f213a586619ec1691f929f50950"
+  },
+  "real_2d_tracking": {
+    "clips": 28,
+    "frames": 13156,
+    "comparator": "previous ST3D frontend",
+    "abnormal_flags": [
+      173,
+      38
+    ],
+    "large_jumps": [
+      62,
+      3
+    ]
+  },
+  "source_sha256": {
+    "curves.json": "31c11e1aaba6ae2331077ac64ff4faf543655469c91cdf4e354c30f3fddbcc0d",
+    "inventory.json": "8eb2ee4ab02e4f0d3e48a9f07b74970544e1b7aa2a650e724ca2fbd52ca95727",
+    "front_dev.json": "cace23993b7c3a6930c1e6321a5af3fe188b5bb59ba6ef00c1916ff14287a82f",
+    "selection.json": "0c519f7e6c789e2af5345d93f1149f612699baf372eff5c7d116f2080591df43",
+    "acceptance.json": "7658c540d8b93766d7e9e704400198793854593c62933a3ead01424ef3ad0b77"
+  }
+}

@@ -25,10 +25,38 @@
 @media(max-width:700px){.innovation-table,.innovation-table tbody,.innovation-table tr,.innovation-table tbody th,.innovation-table td{display:block;width:100%}.innovation-table thead{position:absolute;clip-path:inset(50%);height:1px;width:1px;overflow:hidden}.innovation-table tbody th:first-child{width:100%}.innovation-table tbody th{background:#edf4f4}.innovation-table th,.innovation-table td{padding:8px 12px}.innovation-table tr{margin-bottom:12px;border:1px solid #d8e4e7}.innovation-table td::before{content:attr(data-status);display:block;font-weight:650;color:#226e70}}
 </style><style>
 .compact-curves{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr));gap:12px;max-width:960px;margin:.75rem 0}.compact-curves figure{margin:0;padding:9px 8px 2px;border:1px solid #d7e4e6;border-radius:7px;min-width:0;background:white}.compact-curves figcaption{padding:0 4px}.compact-curves figcaption b,.compact-curves figcaption span{display:block}.compact-curves figcaption span{font-size:13px;color:#4e6875}.compact-curves img{display:block;width:100%;height:auto}.compact-curves a{display:block}#baseline-results + .result-chart{width:90%;max-width:960px}#baseline-results + .result-chart>a{display:block}@media(max-width:760px){#baseline-results + .result-chart{width:100%}}.compact-curves + .series-note{max-width:1000px}@media(max-width:520px){.compact-curves{grid-template-columns:1fr;max-width:340px}}
-</style><style>.stage-tabs button small{display:block;font-size:.78em;font-weight:500;line-height:1.3;margin-top:.15em}</style></head><body><header><nav class="nav" aria-label="报告章节"><a class="brand" href="#method">ST3D</a><div class="navlinks"><a href="#method">网络与训练</a><a href="#synthetic">仿真与基线</a><a href="#real">真实视频</a><a href="#progress">进展与下一步</a><a href="#innovations">创新点</a></div></nav></header><main>
+</style><style>.stage-tabs button small{display:block;font-size:.78em;font-weight:500;line-height:1.3;margin-top:.15em}</style><style>
+.related-work{margin:1.5rem 0 2rem}.related-work h2 span{font-size:.62em;color:#536d79;font-weight:500}
+.related-work table{width:100%;min-width:0;border-collapse:collapse;table-layout:fixed;font-size:15px;line-height:1.55}
+.related-work th,.related-work td{padding:10px 12px;text-align:left;vertical-align:top;white-space:normal;overflow-wrap:break-word;border-bottom:1px solid #d7e4e6}
+.related-work thead th{background:#edf4f4;color:#23565c}.related-work thead th:first-child{width:22%}
+.related-work th small{font-size:.87em;font-weight:400;color:#516872}.rw-question{border-left:3px solid #27818a;padding-left:12px}
+#related-work,#method-overview{scroll-margin-top:100px}
+@media(max-width:740px){.related-work table,.related-work tbody,.related-work tr,.related-work td,.related-work tbody th{display:block;width:100%}.related-work thead{position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden}.related-work tbody th{background:#edf4f4}.related-work td{border:0;padding:5px 10px}.related-work tr{padding-bottom:10px}.related-work td:last-child:before{content:"适用边界　";font-weight:650;color:#275c60}}
+</style></head><body><header><nav class="nav" aria-label="报告章节"><a class="brand" href="#method">ST3D</a><div class="navlinks"><a href="#related-work">相关工作</a><a href="#method-overview">网络与训练</a><a href="#synthetic">仿真与基线</a><a href="#real">真实视频</a><a href="#progress">进展与下一步</a><a href="#innovations">创新点</a></div></nav></header><main>
 <section id="method" class="block"><p class="eyebrow">ST3D 1.2 · 研究汇报</p><h1>ST3D：融合外观与时序信息的单目羽毛球三维轨迹重建</h1><p class="paper-subtitle" lang="en">ST3D: Monocular 3D Shuttlecock Trajectory Reconstruction with Appearance and Temporal Cues</p>
 <p class="lead">从一台相机的比赛录像中，结合球的位置、局部外观和前后帧，重建整回合的三维球路。</p>
-<div class="pipeline"><div class="pipe"><b>01 TrackNetV3 检测</b><span>读取比赛视频<br>生成候选球点</span></div><div class="pipe"><b>02 球点与球场</b><span>关联候选点、复核球心<br>标定相机与球场</span></div><div class="pipe"><b>03 时序重建</b><span>融合位置、图像与时间<br>估计每帧三维位置</span></div><div class="pipe"><b>04 完整回合</b><span>将估计投回相机画面<br>五轮修正后稳定飞行轨迹</span></div></div>
+<section class="related-work" aria-labelledby="related-work">
+<h2 id="related-work">相关工作 <span lang="en">Related Work</span></h2>
+<table><thead><tr><th scope="col">方法</th><th scope="col">怎样得到三维球路</th><th scope="col">用于单目比赛录像时的局限</th></tr></thead>
+<tbody>
+<tr><th scope="row">单目物理拟合<br><small>MonoTrack · 2022</small></th>
+<td>先识别击球时刻，把回合切成一拍一段。每段用重力和空气阻力描述飞行，再调整初始位置、速度和阻力系数，使轨迹投回画面后贴合二维球点。</td>
+<td>击球时刻决定每段的边界，球员站位和假定的击球高度也会影响深度估计。原论文的实拍比赛只有二维标注，三维误差在仿真上测量。 <a href="https://openaccess.thecvf.com/content/CVPR2022W/CVSports/papers/Liu_MonoTrack_Shuttle_Trajectory_Reconstruction_From_Monocular_Badminton_Video_CVPRW_2022_paper.pdf">MonoTrack 原文</a></td></tr>
+<tr><th scope="row">单目关键点重建<br><small>TT4D · 2026</small></th>
+<td>把二维球点、时间和 13 个球台关键点送入 Transformer，逐帧估计乒乓球的三维位置与旋转。漏检时保留球台信息，利用前后帧补球路。</td>
+<td>重建网络接收的是坐标序列，球在原图里的拖影方向没有直接进入这一阶段。迁移到羽毛球，还要重新验证不同飞行动力学下的误差。 <a href="https://arxiv.org/html/2605.01234v1">TT4D 原文</a></td></tr>
+<tr><th scope="row">双目视觉<br><small>羽毛球追踪与机器人接球 · 2025</small></th>
+<td>YO-CSA-T 用左右相机的球点恢复三维位置，再用预测球路辅助下一帧检测。ANYmal 羽毛球机器人用机载 ZED X 双目相机识别橙色羽毛球，通过扩展卡尔曼滤波预测拦截点。</td>
+<td>双目测深依赖同一时刻的两个视角。普通转播通常只保留一路画面，缺少计算视差所需的另一幅图。ANYmal 的实机识别还利用了球的颜色。 <a href="https://arxiv.org/abs/2501.06472">YO-CSA-T 原文</a> · <a href="https://arxiv.org/pdf/2505.22974">ANYmal 原文</a></td></tr>
+<tr><th scope="row">光学动捕<br><small>Mori 等 · 羽毛球机械臂 · 2018</small></th>
+<td>研究者在羽毛球的软木球头贴反光胶带，用 8 台 OptiTrack 相机以 240 帧/秒跟踪飞行中的球。机械臂根据测得的位置和速度预测来球，选择挥拍动作。</td>
+<td>这种方法需要预先布置动捕相机并给球贴标。它适合在受控场地提供三维参考，已有的单机位比赛录像缺少这些测量。 <a href="https://www.isi.imi.i.u-tokyo.ac.jp/wp/wp-content/uploads/2018/07/Mori2018_BadmintonArm_RA-L.pdf">Mori 等原文 · 第 IV-A 节</a></td></tr>
+</tbody></table>
+<p class="rw-question"><strong>ST3D 关注的问题</strong>　只给一段单目比赛录像，当球被遮挡或漏检时，局部外观、运动拖影和整回合时序能为深度估计补充多少信息？目前用仿真真值衡量三维误差，用实拍二维标注核对重投影；真实深度仍待独立多机位测量。</p>
+</section>
+
+<div class="pipeline" id="method-overview"><div class="pipe"><b>01 TrackNetV3 检测</b><span>读取比赛视频<br>生成候选球点</span></div><div class="pipe"><b>02 球点与球场</b><span>关联候选点、复核球心<br>标定相机与球场</span></div><div class="pipe"><b>03 时序重建</b><span>融合位置、图像与时间<br>估计每帧三维位置</span></div><div class="pipe"><b>04 完整回合</b><span>将估计投回相机画面<br>五轮修正后稳定飞行轨迹</span></div></div>
 
 <h3 id="network"><span id="tracknet">Pipeline 结构</span></h3>
 <figure id="pipeline-structure" class="paper-figure original-network"><a class="architecture-scroll" href="assets/study11/pipeline_network_names.svg" target="_blank" rel="noopener"><img class="architecture" src="assets/study11/pipeline_network_names.svg" alt="TrackNetV3 从视频给出候选球点，ST3D 跨帧关联并复核球心，再编码观测、重建并修正轨迹。"></a><figcaption><span>TrackNetV3 使用作者公开的权重。三路观测汇合后估计整回合轨迹，按二维观测迭代五轮。1.2 在网络输出后约束飞行方向和相机到球的距离，并在可能击球时允许速度突变。</span><a href="assets/study11/pipeline_network_names.svg" target="_blank" rel="noopener">放大 Pipeline 图</a></figcaption></figure>

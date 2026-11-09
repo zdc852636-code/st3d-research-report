@@ -31,6 +31,7 @@
     constructor(section, cases){
       this.root=section;this.cases=cases;this.sim=section.dataset.group==="sim";this.ticket=0;this.frame=0;this.zoom=1;
       this.view="diagonal";[this.yaw,this.pitch]=views.diagonal;
+      this.playing=false;this.animation=0;this.rate=1;
       this.el=(key)=>section.querySelector('[data-ui="'+key+'"]');
       this.select=this.el("case");this.slider=this.el("seek");this.world=this.el("world");
       if(this.sim){
@@ -44,8 +45,11 @@
       this.select.onchange=()=>this.load(this.select.value);
       this.el("play").onclick=()=>this.togglePlay();
       this.el("home")?.addEventListener("click",()=>this.seek(this.lo));
-      this.el("rate")?.addEventListener("change",()=>{if(this.video)this.video.playbackRate=Number(this.el("rate").value);});
-      this.slider.oninput=()=>this.seek(Number(this.slider.value));
+      this.el("rate")?.addEventListener("change",()=>{
+        this.rebase();this.rate=Number(this.el("rate").value);
+        if(this.video)this.video.playbackRate=this.rate;
+      });
+      this.slider.oninput=()=>this.seek(Number(this.slider.value),this.playing);
       this.el("prev").onclick=()=>this.seek(this.frame-1);this.el("next").onclick=()=>this.seek(this.frame+1);
       this.el("scope")?.addEventListener("change",()=>{if(this.data){this.bounds();this.seek(this.lo);}});
       this.el("scope") && (this.el("scope").checked=new URL(location.href).searchParams.get("rally")==="full");
@@ -80,7 +84,8 @@
     bounds(){[this.lo,this.hi]=this.sim||this.el("scope")?.checked?[0,this.data.n-1]:this.data.focus;this.slider.min=this.lo;this.slider.max=this.hi;}
     async load(key){
       const ticket=++this.ticket;
-      this.video?.pause();this.video?.removeAttribute("src");this.video?.load();this.video=null;this.data=null;
+      this.pause();this.video?.removeAttribute("src");this.video?.load();
+      this.video=null;this.data=null;this.tiles=null;this.el("original").replaceChildren();
       this.root.dataset.ready="loading";this.el("status").textContent="正在载入录像…";
       this.root.querySelectorAll("button:not([data-family]),input,[data-ui=round]").forEach(x=>x.disabled=true);
       try{
@@ -95,26 +100,20 @@
           if(ticket!==this.ticket)return;
           this.tiles=tiles;
         }
-        const v=document.createElement("video");v.muted=true;v.playsInline=true;v.preload="auto";v.setAttribute("aria-label",spec.title+"的原始画面");
-        v.playbackRate=Number(this.el("rate")?.value||1);
-        this.el("original").replaceChildren(v);this.video=v;
-        await new Promise((ok,fail)=>{v.onloadeddata=ok;v.onerror=()=>fail(Error("录像未载入"));v.onemptied=()=>{if(ticket!==this.ticket)ok();};v.src=new URL(d.video,rootURL);v.load();});
-        if(ticket!==this.ticket)return;
+        // Main-network frames come directly from the two lossless image atlases.
+        if(d.kind!=="main"){
+          const v=document.createElement("video");v.muted=true;v.playsInline=true;v.preload="auto";v.setAttribute("aria-label",spec.title+"的原始画面");
+          this.el("original").replaceChildren(v);this.video=v;
+          await new Promise((ok,fail)=>{v.onloadeddata=ok;v.onerror=()=>fail(Error("录像未载入"));v.onemptied=()=>{if(ticket!==this.ticket)ok();};v.src=new URL(d.video,rootURL);v.load();});
+          if(ticket!==this.ticket)return;
+          v.playbackRate=this.rate;
+          v.onended=()=>{if(ticket===this.ticket&&v.ended&&this.playing)this.seek(this.hi);};
+          v.onpause=()=>{if(ticket===this.ticket&&v.paused&&!v.ended&&this.playing)this.pause();};
+          v.onseeked=()=>{if(ticket===this.ticket&&this.data)this.draw();};
+        }
         this.data=d;this.bounds();
-        this.frame=this.lo;this.target=this.frame;this.path=d.xyz;
+        this.frame=this.lo;this.path=d.xyz;this.root.dataset.case=key;
         if(this.sim)this.showSource(d.kind==="main");
-        v.onplay=()=>{this.el("play").textContent="暂停";window.dispatchEvent(new CustomEvent("replay-playing",{detail:v}));};
-        v.onpause=()=>{this.el("play").textContent="播放";};
-        v.onended=()=>{this.frame=this.hi;this.draw();};v.onseeked=()=>{if(ticket===this.ticket){this.target=null;this.frame=clamp(Math.floor(v.currentTime*d.fps+.001),this.lo,this.hi);this.draw();}};
-        const update=(t)=>{
-          if(ticket!==this.ticket||this.target!==null||v.seeking)return;
-          const f=Math.round(t*d.fps);
-          if(!v.paused&&f>=this.hi){this.seek(this.hi);return;}
-          this.frame=clamp(f,this.lo,this.hi);this.draw();
-        };
-        if(v.requestVideoFrameCallback){
-          const watch=(_,m)=>{if(ticket!==this.ticket)return;update(m.mediaTime);v.requestVideoFrameCallback(watch);};v.requestVideoFrameCallback(watch);
-        }else{const watch=()=>{if(ticket!==this.ticket)return;if(!v.paused)update(v.currentTime);requestAnimationFrame(watch);};requestAnimationFrame(watch);}
         this.seek(this.frame);this.root.dataset.ready="true";this.root.querySelectorAll("button,input,[data-ui=round]").forEach(x=>x.disabled=false);
         this.el("status").textContent=this.sim?d.n+" / "+d.n+" 帧球在画内":"选段二维定位误差 "+d.metric.toFixed(2)+" 像素";
         if(this.sim&&this.el("crop")){
@@ -145,9 +144,47 @@
         "实拍场馆背景上叠加仿真球。同一回合的平均误差由主网络初值的 "+d.round_errors_cm[0].toFixed(1)+" cm 变为第 5 轮的 "+d.round_errors_cm[5].toFixed(1)+" cm，可逐轮对照。";
       this.root.closest("section").querySelector("[data-stat=metric-label]").textContent=main?"该回合平均三维误差":"所选轮次平均三维误差";
     }
-    seek(index){if(!this.data)return;const f=clamp(index,this.lo,this.hi);this.video.pause();this.frame=f;this.target=f;this.video.currentTime=(f+.08)/this.data.fps;this.draw();}
-    async togglePlay(){if(!this.data)return;if(!this.video.paused)return this.video.pause();if(this.frame>=this.hi)this.seek(this.lo);
-      try{await this.video.play();}catch(err){this.el("status").textContent="播放未开始，请再点击播放。";}}
+    rebase(){this.startFrame=this.frame;this.startedAt=performance.now();}
+    pause(){
+      this.playing=false;cancelAnimationFrame(this.animation);this.animation=0;this.video?.pause();
+      this.el("play").textContent=this.data&&this.frame>=this.hi?"重播":"播放";
+    }
+    seek(index,keepPlaying=false){
+      if(!this.data)return;
+      this.frame=clamp(index,this.lo,this.hi);
+      if(!keepPlaying||this.frame>=this.hi)this.pause();
+      if(this.video)this.video.currentTime=(this.frame+.08)/this.data.fps;
+      this.rebase();this.draw();
+    }
+    tick(now){
+      if(!this.playing)return;
+      const fps=this.data.fps;
+      if(!this.video?.seeking){
+        const next=this.video?Math.floor(this.video.currentTime*fps+.0001):
+          this.startFrame+Math.floor(Math.max(0,now-this.startedAt)*fps*this.rate/1000);
+        if(next>=this.hi){this.seek(this.hi);return;}
+        const frame=clamp(next,this.lo,this.hi);
+        if(frame!==this.frame){this.frame=frame;this.draw();}
+      }
+      this.animation=requestAnimationFrame(t=>this.tick(t));
+    }
+    async togglePlay(){
+      if(!this.data)return;
+      if(this.playing){this.pause();return;}
+      if(this.frame>=this.hi)this.seek(this.lo);
+      this.rebase();this.playing=true;this.el("play").textContent="暂停";
+      const v=this.video;
+      window.dispatchEvent(new CustomEvent("replay-playing",{detail:this}));
+      this.animation=requestAnimationFrame(t=>this.tick(t));
+      if(v){
+        try{await v.play();}
+        catch(err){
+          if(this.video===v&&this.playing&&err.name!=="AbortError"){
+            this.pause();this.el("status").textContent="录像播放失败，请重新选择该片段。";
+          }
+        }
+      }
+    }
     draw(){
       if(!this.data)return;
       this.slider.value=this.frame;this.el("clock").textContent=(this.frame/this.data.fps).toFixed(2)+" / "+(this.hi/this.data.fps).toFixed(2)+" s";
@@ -207,6 +244,6 @@
   }
   fetch(new URL("cases.json?v=paper-scenes-1",rootURL)).then(r=>{if(!r.ok)throw Error();return r.json();}).then(cases=>{
     document.querySelectorAll(".replay").forEach(s=>{const viewer=new Replay(s,cases.filter(x=>x.group===s.dataset.group));
-      window.addEventListener("replay-playing",e=>{if(viewer.video!==e.detail)viewer.video?.pause();});});
+      window.addEventListener("replay-playing",e=>{if(viewer!==e.detail)viewer.pause();});});
   }).catch(()=>document.querySelectorAll('[data-ui="status"]').forEach(s=>s.textContent="回放目录载入失败，请刷新。"));
 })();

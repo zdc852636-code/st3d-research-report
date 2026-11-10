@@ -11,6 +11,7 @@
   const corners=[[-3.05,-6.7,0],[3.05,-6.7,0],[3.05,6.7,0],[-3.05,6.7,0]];
   const net=[[-3.05,0,0],[-3.05,0,1.55],[3.05,0,1.55],[3.05,0,0]];
   const views={diagonal:[-.95,.48],opposite:[2.2,.46],side:[Math.PI/2,.18],rear:[0,.2],top:[Math.PI/2,1.55]};
+  let activeReplay=null;
   function context(canvas){
     const {width:w,height:h}=canvas.getBoundingClientRect();
     if(!w||!h)return null;
@@ -37,12 +38,12 @@
       if(this.sim){
         this.root.querySelectorAll("[data-family]").forEach(btn=>btn.onclick=()=>{
           if(this.family===btn.dataset.family && this.root.dataset.ready!=="error")return;
-          this.chooseFamily(btn.dataset.family);this.load(this.select.value);
+          this.chooseFamily(btn.dataset.family);this.switchCase();
         });
         this.el("round").onchange=()=>this.chooseRound(Number(this.el("round").value));
         this.chooseFamily("main");
       }else cases.forEach(x=>this.select.add(new Option(x.title,x.key)));
-      this.select.onchange=()=>this.load(this.select.value);
+      this.select.onchange=()=>this.switchCase();
       this.el("play").onclick=()=>this.togglePlay();
       this.el("home")?.addEventListener("click",()=>this.seek(this.lo));
       this.el("rate")?.addEventListener("change",()=>{
@@ -51,7 +52,7 @@
       });
       this.slider.oninput=()=>this.seek(Number(this.slider.value),this.playing);
       this.el("prev").onclick=()=>this.seek(this.frame-1);this.el("next").onclick=()=>this.seek(this.frame+1);
-      this.el("scope")?.addEventListener("change",()=>{if(this.data){this.bounds();this.seek(this.lo);}});
+      this.el("scope")?.addEventListener("change",()=>{if(this.data){this.bounds();this.seek(this.lo,this.playing);}});
       this.el("scope") && (this.el("scope").checked=new URL(location.href).searchParams.get("rally")==="full");
       for(const key of ["cal","reference","whole"])this.el(key).onchange=()=>this.draw();
       if(!this.sim){
@@ -90,20 +91,34 @@
       this.drawWorld();
     }
     bounds(){[this.lo,this.hi]=this.sim||this.el("scope")?.checked?[0,this.data.n-1]:this.data.focus;this.slider.min=this.lo;this.slider.max=this.hi;}
+    claimPlayback(){
+      if(activeReplay!==this){activeReplay?.pause();activeReplay=this;}
+    }
+    switchCase(){
+      if(activeReplay)this.claimPlayback();
+      this.load(this.select.value);
+    }
     async load(key){
       const ticket=++this.ticket;
-      this.pause();this.video?.removeAttribute("src");this.video?.load();
+      this.pendingLoad?.abort();
+      const controller=new AbortController();
+      this.pendingLoad=controller;
+      const timer=setTimeout(()=>controller.abort(),45000);
+      this.stopClock();this.video?.removeAttribute("src");this.video?.load();
       this.video=null;this.data=null;this.tiles=null;this.el("original").replaceChildren();
       this.root.dataset.ready="loading";this.el("status").textContent="正在载入录像…";
       this.root.querySelectorAll("button:not([data-family]),input,[data-ui=round]").forEach(x=>x.disabled=true);
       try{
         const spec=this.cases.find(x=>x.key===key);
-        const response=await fetch(new URL(spec.file,rootURL));if(!response.ok)throw Error("坐标文件未载入");
+        const response=await fetch(new URL(spec.file,rootURL),{signal:controller.signal});if(!response.ok)throw Error("坐标文件未载入");
         const d=await response.json();if(ticket!==this.ticket)return;
         if(this.sim&&this.el("crop")){
           const tiles=await Promise.all(["crop","heat"].map(async kind=>{
-            const image=new Image();image.src=new URL(key+"_"+kind+".png",rootURL);
-            await image.decode();return image;
+            const response=await fetch(new URL(key+"_"+kind+".png",rootURL),{signal:controller.signal});
+            if(!response.ok)throw Error("输入图像未载入");
+            const image=new Image(),url=URL.createObjectURL(await response.blob());
+            try{image.src=url;await image.decode();return image;}
+            finally{URL.revokeObjectURL(url);}
           }));
           if(ticket!==this.ticket)return;
           this.tiles=tiles;
@@ -112,7 +127,15 @@
         if(d.kind!=="main"){
           const v=document.createElement("video");v.muted=true;v.playsInline=true;v.preload="auto";v.setAttribute("aria-label",spec.title+"的原始画面");
           this.el("original").replaceChildren(v);this.video=v;
-          await new Promise((ok,fail)=>{v.onloadeddata=ok;v.onerror=()=>fail(Error("录像未载入"));v.onemptied=()=>{if(ticket!==this.ticket)ok();};v.src=new URL(d.video,rootURL);v.load();});
+          await new Promise((ok,fail)=>{
+            const signal=controller.signal;
+            const aborted=()=>fail(Error("录像载入中断"));
+            if(signal.aborted){aborted();return;}
+            signal.addEventListener("abort",aborted,{once:true});
+            v.onloadeddata=()=>{signal.removeEventListener("abort",aborted);ok();};
+            v.onerror=()=>{signal.removeEventListener("abort",aborted);fail(Error("录像未载入"));};
+            v.src=new URL(d.video,rootURL);v.load();
+          });
           if(ticket!==this.ticket)return;
           v.playbackRate=this.rate;
           v.onended=()=>{if(ticket===this.ticket&&v.ended&&this.playing)this.seek(this.hi);};
@@ -123,7 +146,7 @@
         this.frame=this.lo;this.path=d.xyz;this.root.dataset.case=key;
         if(!this.sim)this.el("reversal-frame").hidden=d.review_frame==null;
         if(this.sim)this.showSource(d.kind==="main");
-        this.seek(this.frame);this.root.dataset.ready="true";this.root.querySelectorAll("button,input,[data-ui=round]").forEach(x=>x.disabled=false);
+        this.seek(this.frame,activeReplay===this);this.root.dataset.ready="true";this.root.querySelectorAll("button,input,[data-ui=round]").forEach(x=>x.disabled=false);
         this.el("status").textContent=this.sim?d.n+" / "+d.n+" 帧球在画内":"选段二维定位误差 "+d.metric.toFixed(2)+" 像素";
         if(this.sim&&this.el("crop")){
           const stats=this.root.closest("section");
@@ -132,8 +155,16 @@
           const frames=stats.querySelector("[data-stat=frames]");
           if(frames)frames.textContent=d.n+" 帧";
         }
-        this.el("play").textContent="播放";this.draw();
-      }catch(err){if(ticket===this.ticket){this.el("status").textContent=err.message;this.root.dataset.ready="error";}}
+        if(activeReplay===this)this.startPlayback();
+      }catch(err){
+        if(ticket!==this.ticket)return;
+        this.pause();this.data=null;this.root.dataset.ready="error";
+        this.el("status").textContent=(controller.signal.aborted?"载入超时":err.message)+"，可重新载入。";
+        this.el("play").disabled=false;this.el("play").textContent="重新载入";
+      }finally{
+        clearTimeout(timer);
+        if(ticket===this.ticket)this.pendingLoad=null;
+      }
     }
     showSource(main){
       const d=this.data;
@@ -154,9 +185,13 @@
       this.root.closest("section").querySelector("[data-stat=metric-label]").textContent=main?"该回合平均三维误差":"所选轮次平均三维误差";
     }
     rebase(){this.startFrame=this.frame;this.startedAt=performance.now();}
-    pause(){
+    stopClock(){
       this.playing=false;cancelAnimationFrame(this.animation);this.animation=0;this.video?.pause();
       this.el("play").textContent=this.data&&this.frame>=this.hi?"重播":"播放";
+    }
+    pause(){
+      if(activeReplay===this)activeReplay=null;
+      this.stopClock();
     }
     seek(index,keepPlaying=false){
       if(!this.data)return;
@@ -177,19 +212,23 @@
       }
       this.animation=requestAnimationFrame(t=>this.tick(t));
     }
-    async togglePlay(){
-      if(!this.data)return;
+    togglePlay(){
+      if(this.root.dataset.ready==="error"){this.claimPlayback();this.load(this.select.value);return;}
       if(this.playing){this.pause();return;}
-      if(this.frame>=this.hi)this.seek(this.lo);
+      this.startPlayback();
+    }
+    async startPlayback(){
+      this.claimPlayback();
+      if(!this.data||this.playing)return;
+      if(this.frame>=this.hi)this.seek(this.lo,true);
       this.rebase();this.playing=true;this.el("play").textContent="暂停";
       const v=this.video;
-      window.dispatchEvent(new CustomEvent("replay-playing",{detail:this}));
       this.animation=requestAnimationFrame(t=>this.tick(t));
       if(v){
         try{await v.play();}
         catch(err){
-          if(this.video===v&&this.playing&&err.name!=="AbortError"){
-            this.pause();this.el("status").textContent="录像播放失败，请重新选择该片段。";
+          if(this.video===v&&this.playing&&v.paused){
+            this.pause();this.el("status").textContent="录像已暂停，点击播放可继续。";
           }
         }
       }
@@ -257,7 +296,16 @@
     }
   }
   fetch(new URL("cases_release12.json",rootURL)).then(r=>{if(!r.ok)throw Error();return r.json();}).then(cases=>{
-    document.querySelectorAll(".replay").forEach(s=>{const viewer=new Replay(s,cases.filter(x=>x.group===s.dataset.group));
-      window.addEventListener("replay-playing",e=>{if(viewer!==e.detail)viewer.pause();});});
+    const viewers=Array.from(document.querySelectorAll(".replay"),s=>new Replay(s,cases.filter(x=>x.group===s.dataset.group)));
+    function follow(hash){
+      const section=document.getElementById(hash.slice(1));
+      const next=viewers.find(v=>section?.contains(v.root));
+      if(activeReplay && next && activeReplay!==next)next.startPlayback();
+    }
+    window.addEventListener("hashchange",()=>follow(location.hash));
+    document.addEventListener("click",event=>{
+      const link=event.target.closest('a[href^="#"]');
+      if(link&&!event.defaultPrevented&&event.button===0&&!event.ctrlKey&&!event.metaKey&&!event.shiftKey&&!event.altKey)follow(link.hash);
+    });
   }).catch(()=>document.querySelectorAll('[data-ui="status"]').forEach(s=>s.textContent="回放目录载入失败，请刷新。"));
 })();

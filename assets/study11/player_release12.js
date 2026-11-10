@@ -12,6 +12,7 @@
   const net=[[-3.05,0,0],[-3.05,0,1.55],[3.05,0,1.55],[3.05,0,0]];
   const views={diagonal:[-.95,.48],opposite:[2.2,.46],side:[Math.PI/2,.18],rear:[0,.2],top:[Math.PI/2,1.55]};
   let activeReplay=null;
+  let userPaused=false;
   function context(canvas){
     const {width:w,height:h}=canvas.getBoundingClientRect();
     if(!w||!h)return null;
@@ -45,13 +46,13 @@
       }else cases.forEach(x=>this.select.add(new Option(x.title,x.key)));
       this.select.onchange=()=>this.switchCase();
       this.el("play").onclick=()=>this.togglePlay();
-      this.el("home")?.addEventListener("click",()=>this.seek(this.lo));
+      this.el("home")?.addEventListener("click",()=>this.inspectFrame(this.lo));
       this.el("rate")?.addEventListener("change",()=>{
         this.rebase();this.rate=Number(this.el("rate").value);
         if(this.video)this.video.playbackRate=this.rate;
       });
-      this.slider.oninput=()=>this.seek(Number(this.slider.value),this.playing);
-      this.el("prev").onclick=()=>this.seek(this.frame-1);this.el("next").onclick=()=>this.seek(this.frame+1);
+      this.slider.oninput=()=>this.playing?this.seek(Number(this.slider.value),true):this.inspectFrame(Number(this.slider.value));
+      this.el("prev").onclick=()=>this.inspectFrame(this.frame-1);this.el("next").onclick=()=>this.inspectFrame(this.frame+1);
       this.el("scope")?.addEventListener("change",()=>{if(this.data){this.bounds();this.seek(this.lo,this.playing);}});
       this.el("scope") && (this.el("scope").checked=new URL(location.href).searchParams.get("rally")==="full");
       for(const key of ["cal","reference","whole"])this.el(key).onchange=()=>this.draw();
@@ -60,7 +61,7 @@
         this.el("reversal-frame").onclick=()=>{
           if(this.data?.review_frame==null)return;
           this.el("previous-path").checked=true;
-          this.seek(this.data.review_frame);
+          this.inspectFrame(this.data.review_frame);
         };
       }
       this.el("zoom").oninput=e=>{this.zoom=Number(e.target.value);this.drawWorld();};
@@ -95,7 +96,7 @@
       if(activeReplay!==this){activeReplay?.pause();activeReplay=this;}
     }
     switchCase(){
-      if(activeReplay)this.claimPlayback();
+      if(activeReplay||!userPaused)this.claimPlayback();
       this.load(this.select.value);
     }
     async load(key){
@@ -193,6 +194,10 @@
       if(activeReplay===this)activeReplay=null;
       this.stopClock();
     }
+    inspectFrame(index){
+      userPaused=true;
+      this.seek(index);
+    }
     seek(index,keepPlaying=false){
       if(!this.data)return;
       this.frame=clamp(index,this.lo,this.hi);
@@ -213,6 +218,7 @@
       this.animation=requestAnimationFrame(t=>this.tick(t));
     }
     togglePlay(){
+      userPaused=this.playing;
       if(this.root.dataset.ready==="error"){this.claimPlayback();this.load(this.select.value);return;}
       if(this.playing){this.pause();return;}
       this.startPlayback();
@@ -297,15 +303,15 @@
   }
   fetch(new URL("cases_release12.json",rootURL)).then(r=>{if(!r.ok)throw Error();return r.json();}).then(cases=>{
     const viewers=Array.from(document.querySelectorAll(".replay"),s=>new Replay(s,cases.filter(x=>x.group===s.dataset.group)));
-    function follow(hash){
+    function follow(hash,chosen=false){
       const section=document.getElementById(hash.slice(1));
       const next=viewers.find(v=>section?.contains(v.root));
-      if(activeReplay && next && activeReplay!==next)next.startPlayback();
+      if((activeReplay||(chosen&&!userPaused)) && next && activeReplay!==next)next.startPlayback();
     }
     window.addEventListener("hashchange",()=>follow(location.hash));
     document.addEventListener("click",event=>{
       const link=event.target.closest('a[href^="#"]');
-      if(link&&!event.defaultPrevented&&event.button===0&&!event.ctrlKey&&!event.metaKey&&!event.shiftKey&&!event.altKey)follow(link.hash);
+      if(link&&!event.defaultPrevented&&event.button===0&&!event.ctrlKey&&!event.metaKey&&!event.shiftKey&&!event.altKey)follow(link.hash,true);
     });
   }).catch(()=>document.querySelectorAll('[data-ui="status"]').forEach(s=>s.textContent="回放目录载入失败，请刷新。"));
 })();
